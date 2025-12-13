@@ -21,6 +21,25 @@
 | 認証 | Firebase Auth | Google, Twitter認証 |
 | 画像ストレージ | Cloudflare R2 | 敵画像の保存用 |
 
+### 選定理由
+
+**Cloudflare Pages / Workers / R2**
+- 既にCloudflareでドメイン（deepon.dev）を運用しており、統一したかった
+- 無料枠が大きく、ランニングコストを抑えられる
+
+**DynamoDB**
+- MySQLの経験が多いため、違うDBを学習したかった
+- AWSアカウントを既に持っている
+- 無料枠（ストレージ25GB、25RCU/WCU）で個人開発には十分
+
+**Firebase Auth**
+- 認証自体は無料（電話認証のみ有料）
+- Google, Twitter認証の設定が簡単
+- 情報が多く、トラブル時に解決しやすい
+
+**React + TypeScript**
+- 既存の経験あり（deepon.dev, app001.deepon.devで使用）
+
 ### DynamoDB注意点
 - 必ず**プロビジョンドモード**で作成（オンデマンドだと課金される）
 - Auto Scalingは無効にする
