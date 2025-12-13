@@ -44,6 +44,19 @@
 
 ---
 
+## 技術スタック
+
+| 項目 | 選定 |
+|------|------|
+| フロントエンド | React + TypeScript（Vite） |
+| ホスティング | Cloudflare Pages |
+| API | Cloudflare Workers |
+| DB | DynamoDB |
+| 認証 | Firebase Auth（Google, Twitter） |
+| 画像ストレージ | Cloudflare R2 |
+
+---
+
 ## 主要な設計決定
 
 ### 認証
