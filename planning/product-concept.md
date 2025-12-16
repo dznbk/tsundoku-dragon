@@ -50,7 +50,7 @@
 |------|------|
 | フロントエンド | React + TypeScript（Vite） |
 | ホスティング | Cloudflare Pages |
-| API | Cloudflare Workers |
+| API | Cloudflare Workers + Hono |
 | DB | DynamoDB |
 | 認証 | Firebase Auth（Google, Twitter） |
 | 画像ストレージ | Cloudflare R2 |

@@ -16,7 +16,7 @@
 |------|------|------|
 | フロントエンド | React + TypeScript | Vite使用 |
 | ホスティング（フロント） | Cloudflare Pages | |
-| API | Cloudflare Workers | |
+| API | Cloudflare Workers + Hono | TypeScript |
 | DB | DynamoDB | プロビジョンドモード（無料枠内に収める） |
 | 認証 | Firebase Auth | Google, Twitter認証 |
 | 画像ストレージ | Cloudflare R2 | 敵画像の保存用 |
@@ -40,6 +40,12 @@
 **React + TypeScript**
 - 既存の経験あり（deepon.dev, app001.deepon.devで使用）
 
+**Hono**
+- Cloudflare Workers向けに最適化された軽量Webフレームワーク
+- Express風のAPIで学習コストが低い
+- TypeScript対応が良い
+- 日本人作者で日本語情報が多い
+
 ### DynamoDB注意点
 - 必ず**プロビジョンドモード**で作成（オンデマンドだと課金される）
 - Auto Scalingは無効にする
@@ -48,10 +54,6 @@
 ---
 
 ## 未決定事項・次回検討事項
-
-### バックエンドフレームワーク
-- Cloudflare Workersで使う言語・フレームワーク
-- 候補：TypeScript + Hono（定番）
 
 ### 画面設計
 - どのような画面が必要か洗い出しが必要
