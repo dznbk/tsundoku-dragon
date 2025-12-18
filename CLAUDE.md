@@ -49,7 +49,13 @@ tsundoku-dragon/
 ### ブランチ戦略（GitHub Flow）
 
 - `main` - 本番ブランチ
-- `feature/xxx` - 機能開発ブランチ
+- 作業ブランチはConventional Commitsのtypeに揃える
+  - `feat/xxx` - 新機能
+  - `fix/xxx` - バグ修正
+  - `docs/xxx` - ドキュメント
+  - `refactor/xxx` - リファクタリング
+  - `test/xxx` - テスト
+  - `chore/xxx` - 雑務
 - PRを作成してマージ（1人開発でもPRを作る）
 
 ### コミットメッセージ（Conventional Commits）
