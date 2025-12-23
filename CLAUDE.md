@@ -34,15 +34,15 @@ tsundoku-dragon/
 
 ## 技術スタック
 
-| レイヤー | 技術 |
-|----------|------|
-| フロントエンド | React + TypeScript（Vite） |
-| ホスティング | Cloudflare Pages |
-| API | Cloudflare Workers + Hono |
-| データベース | DynamoDB（Provisioned mode） |
-| 認証 | Firebase Auth（Google, Twitter） |
-| 画像ストレージ | Cloudflare R2 |
-| IaC | Terraform（予定） |
+| レイヤー       | 技術                             |
+| -------------- | -------------------------------- |
+| フロントエンド | React + TypeScript（Vite）       |
+| ホスティング   | Cloudflare Pages                 |
+| API            | Cloudflare Workers + Hono        |
+| データベース   | DynamoDB（Provisioned mode）     |
+| 認証           | Firebase Auth（Google, Twitter） |
+| 画像ストレージ | Cloudflare R2                    |
+| IaC            | Terraform（予定）                |
 
 ## 開発プロセス
 
@@ -66,16 +66,17 @@ tsundoku-dragon/
 [optional body]
 ```
 
-| type | 用途 |
-|------|------|
-| `feat` | 新機能 |
-| `fix` | バグ修正 |
-| `docs` | ドキュメント |
-| `refactor` | リファクタリング |
-| `test` | テスト |
-| `chore` | 雑務（依存更新など） |
+| type       | 用途                 |
+| ---------- | -------------------- |
+| `feat`     | 新機能               |
+| `fix`      | バグ修正             |
+| `docs`     | ドキュメント         |
+| `refactor` | リファクタリング     |
+| `test`     | テスト               |
+| `chore`    | 雑務（依存更新など） |
 
 例：
+
 - `feat: 本の登録APIを実装`
 - `fix: 経験値計算の端数処理を修正`
 - `docs: データ設計ドキュメントを更新`
@@ -84,13 +85,14 @@ tsundoku-dragon/
 
 Googleのテストサイズを基準に：
 
-| サイズ | 方針 | ツール |
-|--------|------|--------|
-| Small（単体） | 多め。ロジック中心にカバー | Vitest |
-| Medium（結合） | API単位で必要に応じて | Vitest |
-| Large（E2E） | 主要導線のみ | Playwright |
+| サイズ         | 方針                       | ツール     |
+| -------------- | -------------------------- | ---------- |
+| Small（単体）  | 多め。ロジック中心にカバー | Vitest     |
+| Medium（結合） | API単位で必要に応じて      | Vitest     |
+| Large（E2E）   | 主要導線のみ               | Playwright |
 
 E2Eは以下の導線だけ：
+
 - ログイン → 本登録 → 戦闘 → 討伐
 
 ## コーディング規約
@@ -113,13 +115,13 @@ E2Eは以下の導線だけ：
 
 ## 主要ドキュメント
 
-| ドキュメント | 内容 |
-|--------------|------|
-| [planning/product-concept.md](planning/product-concept.md) | プロダクト概要・MVP機能 |
-| [planning/data-design.md](planning/data-design.md) | DynamoDBスキーマ設計 |
-| [planning/exp-system.md](planning/exp-system.md) | 経験値・レベル計算式 |
-| [planning/screen-design.md](planning/screen-design.md) | 画面設計・目的 |
-| [docs/CONTEXT.md](docs/CONTEXT.md) | 開発コンテキスト・議論ログ |
+| ドキュメント                                               | 内容                       |
+| ---------------------------------------------------------- | -------------------------- |
+| [planning/product-concept.md](planning/product-concept.md) | プロダクト概要・MVP機能    |
+| [planning/data-design.md](planning/data-design.md)         | DynamoDBスキーマ設計       |
+| [planning/exp-system.md](planning/exp-system.md)           | 経験値・レベル計算式       |
+| [planning/screen-design.md](planning/screen-design.md)     | 画面設計・目的             |
+| [docs/CONTEXT.md](docs/CONTEXT.md)                         | 開発コンテキスト・議論ログ |
 
 ## コンテキスト維持
 
@@ -138,6 +140,7 @@ E2Eは以下の導線だけ：
 ### YYYY-MM-DD トピック
 
 **議論した内容：**
+
 - 箇条書き
 
 **決定事項と理由：**
