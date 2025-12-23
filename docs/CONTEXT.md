@@ -70,10 +70,11 @@
 
 ### 次にやること
 
-1. DynamoDB接続（AWS SDK設定）
-2. 基本的なCRUD API（本の登録・取得）
-3. Firebase Auth連携
-4. フロントエンド実装
+1. CI整備（GitHub Actions: lint/typecheck/test）
+2. DynamoDB接続（AWS SDK設定）
+3. 基本的なCRUD API（本の登録・取得）
+4. Firebase Auth連携
+5. フロントエンド実装
 
 ## 未決定事項
 
