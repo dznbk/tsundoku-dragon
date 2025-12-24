@@ -6,13 +6,15 @@
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "hono": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
+    "vitest": "^4.0.16",
     "wrangler": "^4.0.0"
   }
 }
