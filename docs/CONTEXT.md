@@ -67,10 +67,11 @@
 - 開発プロセス決定（GitHub Flow、Conventional Commits、テスト方針）
 - CLAUDE.md作成
 - プロジェクト初期セットアップ（モノレポ構成）
+- CI整備（GitHub Actions: lint/typecheck/test/build、Vitest導入）
 
 ### 次にやること
 
-1. CI整備（GitHub Actions: lint/typecheck/test）
+1. PR #3マージ後、GitHubでブランチ保護ルール設定
 2. DynamoDB接続（AWS SDK設定）
 3. 基本的なCRUD API（本の登録・取得）
 4. Firebase Auth連携
