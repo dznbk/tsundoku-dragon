@@ -36,3 +36,10 @@ npm run test             # テスト実行
 npm run typecheck        # 型チェック
 npm run lint             # リント
 ```
+
+## 重要なルール
+
+### 日付の扱い
+
+- 日付を記載する際は必ず `date +%Y-%m-%d` コマンドで現在日付を確認すること
+- 形式: `YYYY-MM-DD`（例: 2026-01-03）
