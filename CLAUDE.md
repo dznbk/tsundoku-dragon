@@ -12,16 +12,16 @@
 
 ## ドキュメント
 
-| ドキュメント | 内容 |
-| ------------ | ---- |
-| [planning/product-concept.md](planning/product-concept.md) | プロダクト概要・MVP機能 |
-| [planning/data-design.md](planning/data-design.md) | DynamoDBスキーマ設計 |
-| [planning/exp-system.md](planning/exp-system.md) | 経験値・レベル計算式 |
-| [planning/screen-design.md](planning/screen-design.md) | 画面設計・目的 |
-| [docs/development-guidelines.md](docs/development-guidelines.md) | 開発ガイドライン |
-| [docs/repository-structure.md](docs/repository-structure.md) | リポジトリ構造 |
-| [docs/glossary.md](docs/glossary.md) | 用語集 |
-| [docs/CONTEXT.md](docs/CONTEXT.md) | 開発コンテキスト・議論ログ |
+| ドキュメント                                                     | 内容                       |
+| ---------------------------------------------------------------- | -------------------------- |
+| [planning/product-concept.md](planning/product-concept.md)       | プロダクト概要・MVP機能    |
+| [planning/data-design.md](planning/data-design.md)               | DynamoDBスキーマ設計       |
+| [planning/exp-system.md](planning/exp-system.md)                 | 経験値・レベル計算式       |
+| [planning/screen-design.md](planning/screen-design.md)           | 画面設計・目的             |
+| [docs/development-guidelines.md](docs/development-guidelines.md) | 開発ガイドライン           |
+| [docs/repository-structure.md](docs/repository-structure.md)     | リポジトリ構造             |
+| [docs/glossary.md](docs/glossary.md)                             | 用語集                     |
+| [docs/CONTEXT.md](docs/CONTEXT.md)                               | 開発コンテキスト・議論ログ |
 
 ## よく使うコマンド
 

@@ -38,15 +38,15 @@ apps/web/src/
 
 ### 配置ルール
 
-| ファイル種別 | 配置先 | 例 |
-|------------|--------|-----|
-| 機能固有コンポーネント | `features/[機能]/components/` | `features/books/components/BookCard.tsx` |
-| 機能固有フック | `features/[機能]/hooks/` | `features/books/hooks/useBook.ts` |
-| 機能固有API呼び出し | `features/[機能]/services/` | `features/books/services/bookApi.ts` |
-| 共通コンポーネント | `shared/components/` | `shared/components/Button.tsx` |
-| 共通フック | `shared/hooks/` | `shared/hooks/useLocalStorage.ts` |
-| ページ | `pages/` | `pages/HomePage.tsx` |
-| テスト | 対象ファイルと同じディレクトリ | `BookCard.test.tsx` |
+| ファイル種別           | 配置先                         | 例                                       |
+| ---------------------- | ------------------------------ | ---------------------------------------- |
+| 機能固有コンポーネント | `features/[機能]/components/`  | `features/books/components/BookCard.tsx` |
+| 機能固有フック         | `features/[機能]/hooks/`       | `features/books/hooks/useBook.ts`        |
+| 機能固有API呼び出し    | `features/[機能]/services/`    | `features/books/services/bookApi.ts`     |
+| 共通コンポーネント     | `shared/components/`           | `shared/components/Button.tsx`           |
+| 共通フック             | `shared/hooks/`                | `shared/hooks/useLocalStorage.ts`        |
+| ページ                 | `pages/`                       | `pages/HomePage.tsx`                     |
+| テスト                 | 対象ファイルと同じディレクトリ | `BookCard.test.tsx`                      |
 
 ### 判断基準
 
@@ -77,13 +77,13 @@ routes → services → repositories
 
 ### 配置ルール
 
-| ファイル種別 | 配置先 | 命名規則 | 例 |
-|------------|--------|---------|-----|
-| ルート | `routes/` | リソース名.ts | `routes/books.ts` |
-| サービス | `services/` | [リソース]Service.ts | `services/bookService.ts` |
-| リポジトリ | `repositories/` | [リソース]Repository.ts | `repositories/bookRepository.ts` |
-| 型定義 | `types/` | [対象].ts | `types/book.ts` |
-| テスト | 対象と同じディレクトリ | [対象].test.ts | `bookService.test.ts` |
+| ファイル種別 | 配置先                 | 命名規則                | 例                               |
+| ------------ | ---------------------- | ----------------------- | -------------------------------- |
+| ルート       | `routes/`              | リソース名.ts           | `routes/books.ts`                |
+| サービス     | `services/`            | [リソース]Service.ts    | `services/bookService.ts`        |
+| リポジトリ   | `repositories/`        | [リソース]Repository.ts | `repositories/bookRepository.ts` |
+| 型定義       | `types/`               | [対象].ts               | `types/book.ts`                  |
+| テスト       | 対象と同じディレクトリ | [対象].test.ts          | `bookService.test.ts`            |
 
 ## packages/shared
 
@@ -103,9 +103,11 @@ packages/shared/src/
 ## 命名規則
 
 ### ディレクトリ
+
 - kebab-case: `book-details/`, `battle-log/`
 
 ### ファイル
+
 - コンポーネント: PascalCase (`BookCard.tsx`)
 - フック: camelCase, use接頭辞 (`useBook.ts`)
 - サービス: camelCase, Service接尾辞 (`bookService.ts`)

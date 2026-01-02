@@ -42,6 +42,7 @@
 | `chore`    | 雑務（依存更新など） |
 
 例：
+
 - `feat: 本の登録APIを実装`
 - `fix: 経験値計算の端数処理を修正`
 
@@ -56,38 +57,43 @@ Googleのテストサイズを基準に：
 | Large（E2E）   | 主要導線のみ               | Playwright |
 
 E2Eは以下の導線だけ：
+
 - ログイン → 本登録 → 戦闘 → 討伐
 
 ## コーディング規約
 
 ### 全般
+
 - TypeScript strict mode
 - ESLint + Prettier でフォーマット統一
 - 日本語コメント可（ただし変数名・関数名は英語）
 
 ### 命名規則
 
-| 対象 | 規則 | 例 |
-|------|------|-----|
-| 変数・関数 | camelCase | `currentPage`, `calculateExp` |
-| 定数 | UPPER_SNAKE_CASE | `MAX_LEVEL`, `EXP_PER_PAGE` |
-| 型・インターフェース | PascalCase | `Book`, `BookStatus` |
-| コンポーネント | PascalCase | `BookCard`, `BattleScreen` |
-| ファイル（コンポーネント） | PascalCase | `BookCard.tsx` |
-| ファイル（その他） | camelCase | `bookService.ts` |
-| テストファイル | 元ファイル名.test | `BookCard.test.tsx` |
+| 対象                       | 規則              | 例                            |
+| -------------------------- | ----------------- | ----------------------------- |
+| 変数・関数                 | camelCase         | `currentPage`, `calculateExp` |
+| 定数                       | UPPER_SNAKE_CASE  | `MAX_LEVEL`, `EXP_PER_PAGE`   |
+| 型・インターフェース       | PascalCase        | `Book`, `BookStatus`          |
+| コンポーネント             | PascalCase        | `BookCard`, `BattleScreen`    |
+| ファイル（コンポーネント） | PascalCase        | `BookCard.tsx`                |
+| ファイル（その他）         | camelCase         | `bookService.ts`              |
+| テストファイル             | 元ファイル名.test | `BookCard.test.tsx`           |
 
 ### フロントエンド
+
 - 関数コンポーネント + Hooks
 - 状態管理は必要になるまで導入しない（useState/useContext優先）
 
 ### バックエンド
+
 - Honoのルーティングはリソース単位でファイル分割
 - エラーは適切なHTTPステータスコードを返す
 
 ## コンテキスト維持
 
 ### CONTEXT.md の更新タイミング
+
 - 設計上の決定をしたとき
 - 新しい技術選定をしたとき
 - 重要な議論があったとき
@@ -98,6 +104,7 @@ E2Eは以下の導線だけ：
 ### YYYY-MM-DD トピック
 
 **議論した内容：**
+
 - 箇条書き
 
 **決定事項と理由：**
