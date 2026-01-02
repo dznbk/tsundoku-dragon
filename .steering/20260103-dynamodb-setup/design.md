@@ -8,10 +8,10 @@ AWS SDK v3をCloudflare Workersで使用し、環境変数でローカル/本番
 
 ### 代替案との比較
 
-| 案 | メリット | デメリット | 採用 |
-|---|----------|-----------|------|
-| AWS SDK v3 | Workers対応、公式、型安全 | バンドルサイズ大きめ | ✓ |
-| REST API直接呼び出し | 軽量 | 署名処理が複雑、保守性低い | - |
+| 案                   | メリット                  | デメリット                 | 採用 |
+| -------------------- | ------------------------- | -------------------------- | ---- |
+| AWS SDK v3           | Workers対応、公式、型安全 | バンドルサイズ大きめ       | ✓    |
+| REST API直接呼び出し | 軽量                      | 署名処理が複雑、保守性低い | -    |
 
 ### 選定理由
 
@@ -32,15 +32,15 @@ AWS SDK v3をCloudflare Workersで使用し、環境変数でローカル/本番
 
 ### 追加・変更するファイル
 
-| ファイル | 種別 | 責務 |
-|---------|------|------|
-| `compose.yaml` | 新規 | DynamoDB Localコンテナ定義 |
-| `apps/api/src/lib/dynamodb.ts` | 新規 | DynamoDBクライアント生成 |
-| `apps/api/src/index.ts` | 変更 | `/db/health`ルート追加 |
-| `apps/api/.dev.vars` | 新規 | ローカル環境変数 |
-| `apps/api/wrangler.toml` | 変更 | 環境変数の型定義 |
-| `scripts/create-table.ts` | 新規 | テーブル作成スクリプト |
-| `.gitignore` | 変更 | `.dev.vars`追加 |
+| ファイル                       | 種別 | 責務                       |
+| ------------------------------ | ---- | -------------------------- |
+| `compose.yaml`                 | 新規 | DynamoDB Localコンテナ定義 |
+| `apps/api/src/lib/dynamodb.ts` | 新規 | DynamoDBクライアント生成   |
+| `apps/api/src/index.ts`        | 変更 | `/db/health`ルート追加     |
+| `apps/api/.dev.vars`           | 新規 | ローカル環境変数           |
+| `apps/api/wrangler.toml`       | 変更 | 環境変数の型定義           |
+| `scripts/create-table.ts`      | 新規 | テーブル作成スクリプト     |
+| `.gitignore`                   | 変更 | `.dev.vars`追加            |
 
 ### 主要コンポーネント
 
@@ -66,6 +66,7 @@ function createDynamoDBClient(env: Env): DynamoDBDocumentClient;
 **テーブル名**: `tsundoku-dragon`（ローカル）/ `tsundoku-dragon-prod`（本番）
 
 **キー構造**:
+
 - PK: string（パーティションキー）
 - SK: string（ソートキー）
 
@@ -85,10 +86,10 @@ function createDynamoDBClient(env: Env): DynamoDBDocumentClient;
 
 ## 依存ライブラリ
 
-| パッケージ | 用途 |
-|-----------|------|
-| `@aws-sdk/client-dynamodb` | DynamoDB基本クライアント |
-| `@aws-sdk/lib-dynamodb` | DocumentClient（高レベルAPI） |
+| パッケージ                 | 用途                          |
+| -------------------------- | ----------------------------- |
+| `@aws-sdk/client-dynamodb` | DynamoDB基本クライアント      |
+| `@aws-sdk/lib-dynamodb`    | DocumentClient（高レベルAPI） |
 
 ## セキュリティ考慮事項
 
