@@ -9,6 +9,13 @@ port = 8787
 [vars]
 AWS_REGION = "ap-northeast-1"
 DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
+FIREBASE_PROJECT_ID = "tsundoku-dragon"
+PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
+
+# KV namespace for Firebase Auth public key cache
+[[kv_namespaces]]
+binding = "PUBLIC_JWK_CACHE_KV"
+id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # wrangler kv:namespace create PUBLIC_JWK_CACHE_KV で取得
 
 # シークレットは wrangler secret put で設定:
 # wrangler secret put AWS_ACCESS_KEY_ID

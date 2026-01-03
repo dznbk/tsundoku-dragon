@@ -19,12 +19,22 @@ vi.mock('../repositories/bookRepository', () => ({
   },
 }));
 
+// Firebase Auth のモック
+vi.mock('../middleware/auth', () => ({
+  getAuthUserId: vi.fn(() => 'test-user'),
+  authMiddleware: vi.fn(),
+  getFirebaseToken: vi.fn(),
+}));
+
 describe('Books Routes', () => {
   const mockEnv = {
     AWS_ACCESS_KEY_ID: 'test',
     AWS_SECRET_ACCESS_KEY: 'test',
     AWS_REGION: 'ap-northeast-1',
     DYNAMODB_TABLE_NAME: 'test-table',
+    FIREBASE_PROJECT_ID: 'test-project',
+    PUBLIC_JWK_CACHE_KEY: 'test-cache-key',
+    PUBLIC_JWK_CACHE_KV: {} as KVNamespace,
   };
 
   const app = new Hono().route('/books', books);
@@ -49,7 +59,6 @@ describe('Books Routes', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-User-Id': 'test-user',
           },
           body: JSON.stringify({ title: 'テスト本', totalPages: 100 }),
         },
@@ -64,24 +73,6 @@ describe('Books Routes', () => {
       expect(body.userId).toBe('test-user');
       expect(body.currentPage).toBe(0);
       expect(body.status).toBe('reading');
-    });
-
-    it('X-User-Idがない場合はdev-user-001を使う', async () => {
-      mockSave.mockResolvedValueOnce(undefined);
-
-      const res = await app.request(
-        '/books',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: 'テスト本', totalPages: 100 }),
-        },
-        mockEnv
-      );
-
-      expect(res.status).toBe(201);
-      const body = (await res.json()) as Book;
-      expect(body.userId).toBe('dev-user-001');
     });
 
     it('titleがない場合は400を返す', async () => {
@@ -145,13 +136,7 @@ describe('Books Routes', () => {
       ];
       mockFindByUserId.mockResolvedValueOnce(mockBooks);
 
-      const res = await app.request(
-        '/books',
-        {
-          headers: { 'X-User-Id': 'test-user' },
-        },
-        mockEnv
-      );
+      const res = await app.request('/books', {}, mockEnv);
 
       expect(res.status).toBe(200);
       const body = (await res.json()) as { books: Book[] };
@@ -162,13 +147,7 @@ describe('Books Routes', () => {
     it('空の一覧を返す', async () => {
       mockFindByUserId.mockResolvedValueOnce([]);
 
-      const res = await app.request(
-        '/books',
-        {
-          headers: { 'X-User-Id': 'test-user' },
-        },
-        mockEnv
-      );
+      const res = await app.request('/books', {}, mockEnv);
 
       expect(res.status).toBe(200);
       const body = (await res.json()) as { books: Book[] };
@@ -192,13 +171,7 @@ describe('Books Routes', () => {
       };
       mockFindById.mockResolvedValueOnce(mockBook);
 
-      const res = await app.request(
-        '/books/book-123',
-        {
-          headers: { 'X-User-Id': 'test-user' },
-        },
-        mockEnv
-      );
+      const res = await app.request('/books/book-123', {}, mockEnv);
 
       expect(res.status).toBe(200);
       const body = (await res.json()) as Book;
@@ -209,13 +182,7 @@ describe('Books Routes', () => {
     it('存在しない本は404を返す', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const res = await app.request(
-        '/books/not-exist',
-        {
-          headers: { 'X-User-Id': 'test-user' },
-        },
-        mockEnv
-      );
+      const res = await app.request('/books/not-exist', {}, mockEnv);
 
       expect(res.status).toBe(404);
       const body = (await res.json()) as { error: string };
