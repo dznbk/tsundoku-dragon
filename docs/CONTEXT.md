@@ -68,14 +68,17 @@
 - CLAUDE.md作成
 - プロジェクト初期セットアップ（モノレポ構成）
 - CI整備（GitHub Actions: lint/typecheck/test/build、Vitest導入）
+- DynamoDB接続基盤（AWS SDK v3、DynamoDB Local、テーブル作成）
 
 ### 次にやること
 
-1. PR #3マージ後、GitHubでブランチ保護ルール設定
-2. DynamoDB接続（AWS SDK設定）
-3. 基本的なCRUD API（本の登録・取得）
-4. Firebase Auth連携
-5. フロントエンド実装
+1. 基本的なCRUD API（本の登録・取得）
+2. Firebase Auth連携
+3. フロントエンド実装
+
+### スキップ
+
+- GitHubブランチ保護ルール（GitHub Freeのprivateリポジトリでは利用不可、public化後に設定）
 
 ## 未決定事項
 

@@ -4,3 +4,12 @@ compatibility_date = "2025-12-23"
 
 [dev]
 port = 8787
+
+# 本番環境変数（シークレット以外）
+[vars]
+AWS_REGION = "ap-northeast-1"
+DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
+
+# シークレットは wrangler secret put で設定:
+# wrangler secret put AWS_ACCESS_KEY_ID
+# wrangler secret put AWS_SECRET_ACCESS_KEY
