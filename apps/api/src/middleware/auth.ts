@@ -1,6 +1,7 @@
 import { verifyFirebaseAuth, getFirebaseToken } from '@hono/firebase-auth';
 import type { Context, MiddlewareHandler, Next } from 'hono';
-import type { Env } from '../lib/dynamodb';
+import { HTTPException } from 'hono/http-exception';
+import type { Env } from '../types/env';
 
 /**
  * Firebase Auth認証ミドルウェア
@@ -18,12 +19,12 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Env }> = async (
 
 /**
  * 認証済みユーザーのFirebase UIDを取得
- * @throws 認証されていない場合はエラー
+ * @throws 認証されていない場合は401エラー
  */
 export function getAuthUserId(c: Context<{ Bindings: Env }>): string {
   const token = getFirebaseToken(c);
   if (!token) {
-    throw new Error('User is not authenticated');
+    throw new HTTPException(401, { message: 'User is not authenticated' });
   }
   return token.uid;
 }

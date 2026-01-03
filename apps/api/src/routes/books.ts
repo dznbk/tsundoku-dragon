@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import type { Env } from '../lib/dynamodb';
+import type { Env } from '../types/env';
 import { getAuthUserId } from '../middleware/auth';
 import { BookService } from '../services/bookService';
 import { createBookSchema } from '../types/api';

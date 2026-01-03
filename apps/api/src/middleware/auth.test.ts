@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { authMiddleware, getAuthUserId } from './auth';
-import type { Env } from '../lib/dynamodb';
+import type { Env } from '../types/env';
 import type { Context } from 'hono';
 
 // Firebase Auth のモック
@@ -65,14 +66,18 @@ describe('auth middleware', () => {
       expect(userId).toBe('firebase-user-123');
     });
 
-    it('トークンがない場合はエラー', () => {
+    it('トークンがない場合はHTTPException 401', () => {
       vi.mocked(getFirebaseToken).mockReturnValue(null);
 
       const mockContext = {} as Context<{ Bindings: Env }>;
 
-      expect(() => getAuthUserId(mockContext)).toThrow(
-        'User is not authenticated'
-      );
+      expect(() => getAuthUserId(mockContext)).toThrow(HTTPException);
+      try {
+        getAuthUserId(mockContext);
+      } catch (e) {
+        expect(e).toBeInstanceOf(HTTPException);
+        expect((e as HTTPException).status).toBe(401);
+      }
     });
   });
 });

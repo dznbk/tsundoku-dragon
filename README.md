@@ -77,6 +77,35 @@ tsundoku-dragon/
 └── docs/             # 開発ドキュメント
 ```
 
+## デプロイ
+
+### APIのデプロイ（Cloudflare Workers）
+
+初回デプロイ前に以下の準備が必要です:
+
+1. **KV Namespace の作成**
+
+   ```bash
+   cd apps/api
+   wrangler kv:namespace create PUBLIC_JWK_CACHE_KV
+   wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --preview
+   ```
+
+   出力されたIDを `wrangler.toml` の `id` と `preview_id` に設定してください。
+
+2. **シークレットの設定**
+
+   ```bash
+   wrangler secret put AWS_ACCESS_KEY_ID
+   wrangler secret put AWS_SECRET_ACCESS_KEY
+   ```
+
+3. **デプロイ実行**
+
+   ```bash
+   npm run deploy
+   ```
+
 ## ドキュメント
 
 - [プロダクトコンセプト](planning/product-concept.md)
