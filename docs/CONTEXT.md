@@ -69,12 +69,13 @@
 - プロジェクト初期セットアップ（モノレポ構成）
 - CI整備（GitHub Actions: lint/typecheck/test/build、Vitest導入）
 - DynamoDB接続基盤（AWS SDK v3、DynamoDB Local、テーブル作成）
+- Book CRUD API（POST/GET /books、GET /books/:id）
+- 開発プロセス改善（husky + lint-staged導入）
 
 ### 次にやること
 
-1. 基本的なCRUD API（本の登録・取得）
-2. Firebase Auth連携
-3. フロントエンド実装
+1. Firebase Auth連携
+2. フロントエンド実装
 
 ### スキップ
 
@@ -136,6 +137,43 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-04 Book CRUD API実装 & 開発プロセス改善
+
+**実施した内容：**
+
+- 本の登録・取得API実装（POST /books、GET /books、GET /books/:id）
+- レイヤードアーキテクチャで実装（routes → services → repositories）
+- 開発プロセス改善（husky + lint-staged、steeringスキル修正）
+
+**作成・修正したファイル：**
+
+| ファイル                           | 内容                 |
+| ---------------------------------- | -------------------- |
+| `apps/api/src/types/api.ts`        | zodスキーマ定義      |
+| `apps/api/src/repositories/*.ts`   | DynamoDBアクセス層   |
+| `apps/api/src/services/*.ts`       | ビジネスロジック層   |
+| `apps/api/src/routes/books.ts`     | HTTPハンドラ         |
+| `.husky/pre-commit`                | pre-commitフック     |
+| `.claude/skills/steering/SKILL.md` | スキル説明文修正     |
+| `~/.claude/CLAUDE.md`              | グローバルルール追加 |
+
+**技術的な決定：**
+
+| 決定                         | 理由                                         |
+| ---------------------------- | -------------------------------------------- |
+| zod + @hono/zod-validator    | 型安全なバリデーション                       |
+| nanoidでID生成               | UUIDより短く、URL-safe                       |
+| X-User-Idヘッダーで一時認証  | Firebase Auth導入前の開発用                  |
+| pre-commitでPrettier自動実行 | CI失敗を防止                                 |
+| GitHub URLは`gh api`で取得   | WebFetchだと認証が必要なコンテンツに対応不可 |
+
+**学び：**
+
+- Vitest v4ではモッククラスを`vi.fn().mockImplementation()`で作ると動作しない。実際のクラス定義が必要
+- `as Book`でキャストエラーが出る場合は`as unknown as Book`を使用
+
+---
 
 ### 2026-01-02 スペック駆動開発ドキュメント整備
 
