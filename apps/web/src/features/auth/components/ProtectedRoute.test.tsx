@@ -1,5 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+
+// Mock Firebase before importing AuthContext
+vi.mock('firebase/auth', () => ({
+  onAuthStateChanged: vi.fn(),
+  signInWithPopup: vi.fn(),
+  signOut: vi.fn(),
+  GoogleAuthProvider: vi.fn(),
+  getAuth: vi.fn(() => ({})),
+}));
+
+vi.mock('../../../lib/firebase', () => ({
+  auth: {},
+}));
+
 import { AuthContext, type AuthContextValue } from '../contexts/AuthContext';
 import { ProtectedRoute } from './ProtectedRoute';
 
