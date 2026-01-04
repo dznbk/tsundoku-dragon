@@ -73,17 +73,12 @@
 - 開発プロセス改善（husky + lint-staged導入）
 - Firebase Auth連携（API認証ミドルウェア実装）
 - Firebaseコンソール設定（プロジェクト作成、Google認証有効化）
+- フロントエンド認証基盤（Firebase SDK、AuthContext、ProtectedRoute、authApi）
 
 ### 次にやること
 
-1. フロントエンド認証基盤（`/add-feature フロントエンド認証基盤`）
-   - Firebase SDK導入・初期化
-   - ログイン画面（Googleログインボタン）
-   - 認証状態管理（Context/Provider）
-   - Protected Route（未認証→ログイン画面へ）
-   - APIクライアント（IDトークン付与）
-2. 本の登録画面
-3. ホーム画面（本一覧）
+1. 本の登録画面
+2. ホーム画面（本一覧）
 
 ### スキップ
 
@@ -145,6 +140,47 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-04 フロントエンド認証基盤
+
+**実施した内容：**
+
+- Firebase SDK導入（v12.7.0）
+- AuthContext / useAuth による認証状態管理
+- LoginPage / LoginButton コンポーネント
+- ProtectedRoute による保護ルート
+- authApi（IDトークン自動付与APIクライアント）
+- 環境変数バリデーション
+
+**作成したファイル：**
+
+| ファイル                                                   | 内容                    |
+| ---------------------------------------------------------- | ----------------------- |
+| `apps/web/src/lib/firebase.ts`                             | Firebase初期化          |
+| `apps/web/src/features/auth/contexts/AuthContext.tsx`      | 認証コンテキスト        |
+| `apps/web/src/features/auth/hooks/useAuth.ts`              | 認証フック              |
+| `apps/web/src/features/auth/components/LoginButton.tsx`    | ログインボタン          |
+| `apps/web/src/features/auth/components/ProtectedRoute.tsx` | 保護ルート              |
+| `apps/web/src/features/auth/services/authApi.ts`           | 認証付きAPIクライアント |
+| `apps/web/src/pages/LoginPage.tsx`                         | ログインページ          |
+| `apps/web/src/vite-env.d.ts`                               | 環境変数型定義          |
+
+**技術的な決定：**
+
+| 決定                          | 理由                                  |
+| ----------------------------- | ------------------------------------- |
+| Context APIで認証状態管理     | シンプル、外部ライブラリ不要          |
+| Feature-based構造             | `features/auth/`に関連ファイルを集約  |
+| 遅延バリデーション（authApi） | テスト時のモジュールロードエラー回避  |
+| vi.hoistedでモック変数定義    | Vitestのvi.mockホイスティング問題対応 |
+
+**学び：**
+
+- Vitestの`vi.mock()`はファイル先頭にホイスティングされるため、モック関数を参照する場合は`vi.hoisted()`を使用
+- `erasableSyntaxOnly: true`の環境ではクラスのパラメータプロパティが使用不可
+- ルートから`npm run lint`実行時は`apps/web`のeslintルールが読み込まれないため、`eslint-disable`コメントは避ける
+
+---
 
 ### 2026-01-04 Firebase Auth連携
 
