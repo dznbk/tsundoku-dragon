@@ -49,7 +49,7 @@ npm run lint             # リント
 Cloudflare Workersへのデプロイ前に確認すること:
 
 1. **KV Namespace の作成**
-   - `wrangler.toml` にプレースホルダー (`xxxxxxx`) がある場合は実際のIDに置換
+   - `wrangler.toml` にプレースホルダー (`REPLACE_ME_WITH_ACTUAL_KV_ID`) がある場合は実際のIDに置換
    - 作成コマンド: `wrangler kv:namespace create PUBLIC_JWK_CACHE_KV`
    - Preview用: `wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --preview`
 

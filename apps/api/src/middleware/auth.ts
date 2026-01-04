@@ -1,4 +1,5 @@
 import { verifyFirebaseAuth, getFirebaseToken } from '@hono/firebase-auth';
+import { WorkersKVStoreSingle } from 'firebase-auth-cloudflare-workers';
 import type { Context, MiddlewareHandler, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import type { Env } from '../types/env';
@@ -6,6 +7,7 @@ import type { Env } from '../types/env';
 /**
  * Firebase Auth認証ミドルウェア
  * 環境変数からprojectIdを取得してトークンを検証
+ * Workers KVで公開鍵をキャッシュしてパフォーマンス向上
  */
 export const authMiddleware: MiddlewareHandler<{ Bindings: Env }> = async (
   c: Context<{ Bindings: Env }>,
@@ -13,6 +15,11 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Env }> = async (
 ) => {
   const middleware = verifyFirebaseAuth({
     projectId: c.env.FIREBASE_PROJECT_ID,
+    keyStoreInitializer: () =>
+      WorkersKVStoreSingle.getOrInitialize(
+        c.env.PUBLIC_JWK_CACHE_KEY,
+        c.env.PUBLIC_JWK_CACHE_KV
+      ),
   });
   return middleware(c, next);
 };
