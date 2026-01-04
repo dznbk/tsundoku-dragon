@@ -1,11 +1,13 @@
 import { auth } from '../../../lib/firebase';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-if (!API_URL) {
-  throw new Error(
-    'VITE_API_URL environment variable is not set. Please define VITE_API_URL in your environment configuration.'
-  );
+function getApiUrl(): string {
+  const url = import.meta.env.VITE_API_URL;
+  if (!url) {
+    throw new Error(
+      'VITE_API_URL environment variable is not set. Please define VITE_API_URL in your environment configuration.'
+    );
+  }
+  return url;
 }
 
 class ApiError extends Error {
@@ -49,7 +51,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 export const apiClient = {
   async get<T>(path: string): Promise<T> {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${getApiUrl()}${path}`, {
       method: 'GET',
       headers,
     });
@@ -58,7 +60,7 @@ export const apiClient = {
 
   async post<T>(path: string, body: unknown): Promise<T> {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${getApiUrl()}${path}`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -68,7 +70,7 @@ export const apiClient = {
 
   async put<T>(path: string, body: unknown): Promise<T> {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${getApiUrl()}${path}`, {
       method: 'PUT',
       headers,
       body: JSON.stringify(body),
@@ -78,7 +80,7 @@ export const apiClient = {
 
   async delete<T>(path: string): Promise<T> {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(`${getApiUrl()}${path}`, {
       method: 'DELETE',
       headers,
     });

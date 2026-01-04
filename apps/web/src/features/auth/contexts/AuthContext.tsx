@@ -15,8 +15,6 @@ export interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-// Context needs to be exported for testing
-// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface AuthProviderProps {

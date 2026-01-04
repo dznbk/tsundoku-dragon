@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Mock environment variables before importing authApi
+vi.stubEnv('VITE_API_URL', 'http://localhost:8787');
+
 // Use vi.hoisted to define mocks that vi.mock can reference
 const { mockGetIdToken, mockAuth } = vi.hoisted(() => {
   const mockGetIdToken = vi.fn().mockResolvedValue('mock-id-token');
