@@ -72,11 +72,18 @@
 - Book CRUD API（POST/GET /books、GET /books/:id）
 - 開発プロセス改善（husky + lint-staged導入）
 - Firebase Auth連携（API認証ミドルウェア実装）
+- Firebaseコンソール設定（プロジェクト作成、Google認証有効化）
 
 ### 次にやること
 
-1. フロントエンド実装
-2. Firebaseコンソールでの認証設定（Google, Twitter）
+1. フロントエンド認証基盤（`/add-feature フロントエンド認証基盤`）
+   - Firebase SDK導入・初期化
+   - ログイン画面（Googleログインボタン）
+   - 認証状態管理（Context/Provider）
+   - Protected Route（未認証→ログイン画面へ）
+   - APIクライアント（IDトークン付与）
+2. 本の登録画面
+3. ホーム画面（本一覧）
 
 ### スキップ
 
