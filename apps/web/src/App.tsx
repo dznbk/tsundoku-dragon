@@ -14,13 +14,21 @@ function AppContent() {
     return <LoginPage />;
   }
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
         <h1>Tsundoku & Dragons</h1>
         <div className="user-info">
           <span>{user.displayName || user.email}</span>
-          <button onClick={signOut}>Logout</button>
+          <button onClick={handleLogout}>Logout</button>
         </div>
       </header>
       <main>

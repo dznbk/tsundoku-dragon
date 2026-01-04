@@ -22,6 +22,22 @@ vi.stubGlobal('fetch', mockFetch);
 // Import after mocking
 import { apiClient, ApiError } from './authApi';
 
+// Helper to create mock response with headers
+function createMockResponse(options: {
+  ok: boolean;
+  status?: number;
+  json?: () => Promise<unknown>;
+  text?: () => Promise<string>;
+}) {
+  return {
+    ...options,
+    status: options.status ?? 200,
+    headers: {
+      get: () => null,
+    },
+  };
+}
+
 describe('authApi', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,10 +48,12 @@ describe('authApi', () => {
 
   describe('get', () => {
     it('makes GET request with auth header', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ data: 'test' }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          ok: true,
+          json: () => Promise.resolve({ data: 'test' }),
+        })
+      );
 
       const result = await apiClient.get('/test');
 
@@ -62,11 +80,13 @@ describe('authApi', () => {
     });
 
     it('throws ApiError on non-ok response', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 404,
-        text: () => Promise.resolve('Not found'),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          ok: false,
+          status: 404,
+          text: () => Promise.resolve('Not found'),
+        })
+      );
 
       await expect(apiClient.get('/test')).rejects.toThrow(ApiError);
     });
@@ -74,10 +94,12 @@ describe('authApi', () => {
 
   describe('post', () => {
     it('makes POST request with body and auth header', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 1 }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          ok: true,
+          json: () => Promise.resolve({ id: 1 }),
+        })
+      );
 
       const result = await apiClient.post('/test', { name: 'test' });
 
@@ -94,10 +116,12 @@ describe('authApi', () => {
 
   describe('put', () => {
     it('makes PUT request with body and auth header', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ updated: true }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          ok: true,
+          json: () => Promise.resolve({ updated: true }),
+        })
+      );
 
       const result = await apiClient.put('/test/1', { name: 'updated' });
 
@@ -114,10 +138,12 @@ describe('authApi', () => {
 
   describe('delete', () => {
     it('makes DELETE request with auth header', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ deleted: true }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          ok: true,
+          json: () => Promise.resolve({ deleted: true }),
+        })
+      );
 
       const result = await apiClient.delete('/test/1');
 
@@ -128,6 +154,18 @@ describe('authApi', () => {
         })
       );
       expect(result).toEqual({ deleted: true });
+    });
+
+    it('handles 204 No Content response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+        headers: { get: () => '0' },
+      });
+
+      const result = await apiClient.delete('/test/1');
+
+      expect(result).toBeUndefined();
     });
   });
 });

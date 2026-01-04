@@ -2,6 +2,12 @@ import { auth } from '../../../lib/firebase';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+if (!API_URL) {
+  throw new Error(
+    'VITE_API_URL environment variable is not set. Please define VITE_API_URL in your environment configuration.'
+  );
+}
+
 class ApiError extends Error {
   status: number;
 
@@ -30,6 +36,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const message = await response.text().catch(() => 'Request failed');
     throw new ApiError(message, response.status);
   }
+
+  // Handle empty responses (e.g., 204 No Content)
+  const contentLength = response.headers.get('content-length');
+  if (response.status === 204 || contentLength === '0') {
+    return undefined as T;
+  }
+
   return response.json();
 }
 
