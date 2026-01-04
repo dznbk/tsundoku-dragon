@@ -71,11 +71,12 @@
 - DynamoDB接続基盤（AWS SDK v3、DynamoDB Local、テーブル作成）
 - Book CRUD API（POST/GET /books、GET /books/:id）
 - 開発プロセス改善（husky + lint-staged導入）
+- Firebase Auth連携（API認証ミドルウェア実装）
 
 ### 次にやること
 
-1. Firebase Auth連携
-2. フロントエンド実装
+1. フロントエンド実装
+2. Firebaseコンソールでの認証設定（Google, Twitter）
 
 ### スキップ
 
@@ -137,6 +138,49 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-04 Firebase Auth連携
+
+**実施した内容：**
+
+- Firebase Auth認証ミドルウェア実装
+- `@hono/firebase-auth`パッケージを使用したIDトークン検証
+- `/books`エンドポイントへの認証適用
+
+**作成・修正したファイル：**
+
+| ファイル                               | 内容                   |
+| -------------------------------------- | ---------------------- |
+| `apps/api/src/middleware/auth.ts`      | 認証ミドルウェア       |
+| `apps/api/src/middleware/auth.test.ts` | 認証ミドルウェアテスト |
+| `apps/api/src/lib/dynamodb.ts`         | Env型拡張              |
+| `apps/api/src/index.ts`                | ミドルウェア適用       |
+| `apps/api/src/routes/books.ts`         | getAuthUserId使用      |
+| `apps/api/wrangler.toml`               | 環境変数・KV追加       |
+
+**技術的な決定：**
+
+| 決定                         | 理由                                                     |
+| ---------------------------- | -------------------------------------------------------- |
+| `@hono/firebase-auth`使用    | Hono公式、設定が簡単、内部でfirebase-auth-cloudflare使用 |
+| Workers KVで公開鍵キャッシュ | パフォーマンス向上                                       |
+| X-User-Idヘッダー廃止        | 正式な認証に置き換え                                     |
+| `/books`のみ認証適用         | ヘルスチェック等は認証不要                               |
+
+**学び：**
+
+- Cloudflare Workersでfirebase-admin SDKは使えない。`@hono/firebase-auth`が最適解
+- KV Namespace IDはデプロイ前に`wrangler kv:namespace create`で取得が必要
+
+**デプロイ前の作業：**
+
+```bash
+# KV Namespaceを作成してIDを取得
+wrangler kv:namespace create PUBLIC_JWK_CACHE_KV
+# 取得したIDをwrangler.tomlに反映
+```
+
+---
 
 ### 2026-01-04 Book CRUD API実装 & 開発プロセス改善
 

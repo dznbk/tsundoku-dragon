@@ -24,6 +24,9 @@ describe('BookService', () => {
     AWS_SECRET_ACCESS_KEY: 'test',
     AWS_REGION: 'ap-northeast-1',
     DYNAMODB_TABLE_NAME: 'test-table',
+    FIREBASE_PROJECT_ID: 'test-project',
+    PUBLIC_JWK_CACHE_KEY: 'test-cache-key',
+    PUBLIC_JWK_CACHE_KV: {} as KVNamespace,
   };
 
   let service: BookService;

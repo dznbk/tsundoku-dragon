@@ -2,10 +2,14 @@ import { DescribeTableCommand } from '@aws-sdk/client-dynamodb';
 import { Hono } from 'hono';
 
 import { createDynamoDBClient, type Env } from './lib/dynamodb';
+import { authMiddleware } from './middleware/auth';
 import books from './routes/books';
 
 const app = new Hono<{ Bindings: Env }>();
 
+// 認証が必要なルートにミドルウェアを適用
+app.use('/books', authMiddleware);
+app.use('/books/*', authMiddleware);
 app.route('/books', books);
 
 app.get('/', (c) => {

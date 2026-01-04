@@ -43,3 +43,21 @@ npm run lint             # リント
 
 - 日付を記載する際は必ず `date +%Y-%m-%d` コマンドで現在日付を確認すること
 - 形式: `YYYY-MM-DD`（例: 2026-01-03）
+
+### デプロイ前チェックリスト
+
+Cloudflare Workersへのデプロイ前に確認すること:
+
+1. **KV Namespace の作成**
+   - `wrangler.toml` にプレースホルダー (`REPLACE_ME_WITH_ACTUAL_KV_ID`) がある場合は実際のIDに置換
+   - 作成コマンド: `wrangler kv:namespace create PUBLIC_JWK_CACHE_KV`
+   - Preview用: `wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --preview`
+
+2. **環境変数の設定**
+   - `FIREBASE_PROJECT_ID` が正しいプロジェクトIDか確認
+   - `PUBLIC_JWK_CACHE_KEY` が設定されているか確認
+
+3. **シークレットの設定**
+   - AWS認証情報は `wrangler secret put` で設定
+   - `wrangler secret put AWS_ACCESS_KEY_ID`
+   - `wrangler secret put AWS_SECRET_ACCESS_KEY`

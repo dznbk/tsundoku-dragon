@@ -1,13 +1,9 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import type { Env } from '../types/env';
 
-export type Env = {
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
-  AWS_REGION: string;
-  DYNAMODB_ENDPOINT?: string;
-  DYNAMODB_TABLE_NAME: string;
-};
+// re-export for backward compatibility
+export type { Env };
 
 export function createDynamoDBClient(env: Env): DynamoDBDocumentClient {
   const client = new DynamoDBClient({
