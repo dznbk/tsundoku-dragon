@@ -29,7 +29,7 @@ function AppContent() {
         <a href="/" className={styles.logoLink} aria-label="ホームに戻る">
           <img
             src="/assets/logo.png"
-            alt="積ん読&ドラゴンズ"
+            alt="積ん読＆ドラゴンズ"
             className={styles.logo}
           />
         </a>
