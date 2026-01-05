@@ -27,8 +27,8 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByAltText('積読＆ドラゴンズ')).toBeInTheDocument();
-      expect(screen.getByText('積読を討伐せよ！')).toBeInTheDocument();
+      expect(screen.getByAltText('積ん読&ドラゴンズ')).toBeInTheDocument();
+      expect(screen.getByText('積ん読を討伐せよ！')).toBeInTheDocument();
       expect(screen.getByText('Googleでログイン')).toBeInTheDocument();
     });
   });

@@ -8,10 +8,10 @@ export default function LoginPage() {
       <DQWindow className={styles.container}>
         <img
           src="/assets/logo.png"
-          alt="積読＆ドラゴンズ"
+          alt="積ん読&ドラゴンズ"
           className={styles.logo}
         />
-        <p className={styles.tagline}>積読を討伐せよ！</p>
+        <p className={styles.tagline}>積ん読を討伐せよ！</p>
         <div className={styles.buttons}>
           <LoginButton provider="google" className={styles.loginButton} />
         </div>
