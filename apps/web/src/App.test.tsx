@@ -27,9 +27,9 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        'Tsundoku & Dragons'
-      );
+      expect(screen.getByAltText('積読＆ドラゴンズ')).toBeInTheDocument();
+      expect(screen.getByText('積読を討伐せよ！')).toBeInTheDocument();
+      expect(screen.getByText('Googleでログイン')).toBeInTheDocument();
     });
   });
 });

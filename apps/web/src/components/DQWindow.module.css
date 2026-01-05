@@ -1,0 +1,11 @@
+.window {
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
+  border: 3px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--color-text);
+}

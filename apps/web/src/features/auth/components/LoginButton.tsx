@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import styles from './LoginButton.module.css';
 
 interface LoginButtonProps {
   provider: 'google';
@@ -19,16 +20,16 @@ export function LoginButton({ provider, className }: LoginButtonProps) {
         await signInWithGoogle();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'ログインに失敗しました');
     } finally {
       setLoading(false);
     }
   };
 
   const getButtonText = () => {
-    if (loading) return 'Logging in...';
-    if (provider === 'google') return 'Sign in with Google';
-    return 'Sign in';
+    if (loading) return 'ログイン中...';
+    if (provider === 'google') return 'Googleでログイン';
+    return 'ログイン';
   };
 
   return (
@@ -41,7 +42,11 @@ export function LoginButton({ provider, className }: LoginButtonProps) {
       >
         {getButtonText()}
       </button>
-      {error && <p className="error">{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert" aria-live="assertive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
