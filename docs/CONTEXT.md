@@ -74,6 +74,7 @@
 - Firebase Auth連携（API認証ミドルウェア実装）
 - Firebaseコンソール設定（プロジェクト作成、Google認証有効化）
 - フロントエンド認証基盤（Firebase SDK、AuthContext、ProtectedRoute、authApi）
+- UI/デザイン改修（visual-design.md準拠、DQウィンドウ/ボタンコンポーネント、ロゴ配置）
 
 ### 次にやること
 
@@ -140,6 +141,61 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-06 UI/デザイン改修（visual-design.md準拠）
+
+**実施した内容：**
+
+- visual-design.mdに基づくSFC時代のRPG風UIへの改修
+- CSS変数でカラーパレット・フォントを一元管理
+- DQWindow/DQButtonコンポーネント作成
+- LoginPage/Appのスタイル改修、ロゴ画像配置
+- ライトモード対応を削除（ダークモード一択）
+- 日本語化、アクセシビリティ改善
+
+**作成・修正したファイル：**
+
+| ファイル                                                       | 内容                        |
+| -------------------------------------------------------------- | --------------------------- |
+| `apps/web/index.html`                                          | Googleフォント読み込み追加  |
+| `apps/web/src/index.css`                                       | CSS変数、グローバルスタイル |
+| `apps/web/src/components/DQWindow.tsx`                         | DQウィンドウコンポーネント  |
+| `apps/web/src/components/DQWindow.module.css`                  | DQウィンドウスタイル        |
+| `apps/web/src/components/DQButton.tsx`                         | DQボタンコンポーネント      |
+| `apps/web/src/components/DQButton.module.css`                  | DQボタンスタイル            |
+| `apps/web/src/pages/LoginPage.tsx`                             | ログインページ改修          |
+| `apps/web/src/pages/LoginPage.module.css`                      | LoginPageスタイル           |
+| `apps/web/src/App.tsx`                                         | App改修                     |
+| `apps/web/src/App.module.css`                                  | Appスタイル                 |
+| `apps/web/src/features/auth/components/LoginButton.tsx`        | 日本語化、アクセシビリティ  |
+| `apps/web/src/features/auth/components/LoginButton.module.css` | エラースタイル              |
+
+**CSS変数一覧：**
+
+```css
+--color-bg-base: #0a0a0a;
+--color-bg-window-light: #1a2d4a;
+--color-bg-window-dark: #0d1a2d;
+--color-bg-window-light-hover: #2a3d5a;
+--color-bg-window-dark-hover: #1a2d3d;
+--color-border: #ffffff;
+--color-text: #ffffff;
+--color-text-muted: #a0a0a0;
+--color-hp: #f39c12;
+--color-exp: #f1c40f;
+--color-success: #27ae60;
+--color-danger: #e74c3c;
+--font-main: 'Noto Sans JP', system-ui, sans-serif;
+--font-pixel: 'DotGothic16', monospace;
+```
+
+**学び：**
+
+- 共通コンポーネントを先に作成し、各画面で再利用するフローが効率的
+- CSS変数は最初から派生色（hover等）も含めて設計すべき
+- アクセシビリティ（aria-label, aria-live）は実装時点で考慮する
+
+---
 
 ### 2026-01-04 フロントエンド認証基盤
 
