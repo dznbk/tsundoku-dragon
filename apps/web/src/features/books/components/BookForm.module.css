@@ -55,7 +55,7 @@
   border-color: var(--color-exp);
 }
 
-.input[aria-invalid="true"] {
+.input[aria-invalid='true'] {
   border-color: var(--color-danger);
 }
 

@@ -1,7 +1,11 @@
 .container {
   width: 120px;
   height: 170px;
-  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
   border: 2px solid var(--color-border);
   border-radius: 4px;
   overflow: hidden;

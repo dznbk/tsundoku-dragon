@@ -50,7 +50,11 @@
 }
 
 .successMessage {
-  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
   border: 2px solid var(--color-success);
   border-radius: 8px;
   padding: 12px 16px;
@@ -60,7 +64,11 @@
 }
 
 .errorMessage {
-  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
   border: 2px solid var(--color-danger);
   border-radius: 8px;
   padding: 12px 16px;

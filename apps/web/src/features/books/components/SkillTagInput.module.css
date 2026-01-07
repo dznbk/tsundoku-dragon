@@ -22,7 +22,11 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
   border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 0.875rem;
@@ -71,7 +75,11 @@
   margin: 4px 0 0;
   padding: 0;
   list-style: none;
-  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
   border: 2px solid var(--color-border);
   border-radius: 4px;
   max-height: 200px;
