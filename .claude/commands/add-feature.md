@@ -113,9 +113,11 @@ Grep('[機能に関連するキーワード]', 'apps/api/')
 Bash('npm test')
 Bash('npm run lint')
 Bash('npm run typecheck')
+Bash('npm run format:check')
 ```
 
 2. いずれかのコマンドでエラーが発生した場合は、問題を分析し、修正コードを生成・適用してから、再度このステップを実行する。
+   - `format:check` でエラーが発生した場合は `npm run format` を実行してフォーマットを修正する。
 
 **このステップが正常に完了したら、決して停止せず、ただちにステップ8に進むこと。**
 
@@ -151,7 +153,7 @@ Bash('npm run typecheck')
 
 - ステップ5: `tasklist.md`の全てのタスクが完了状態（`[x]`または正当な理由でスキップ）になっている。
 - ステップ6: `implementation-validator`サブエージェントの検証をパスする。
-- ステップ7: `test`, `lint`, `typecheck`の全てのコマンドがエラーなく成功する。
+- ステップ7: `test`, `lint`, `typecheck`, `format:check`の全てのコマンドがエラーなく成功する。
 - ステップ8: `tasklist.md`に申し送り事項が記載されている。
 - ステップ9: Pull Requestが作成され、URLがユーザーに報告されている。
 

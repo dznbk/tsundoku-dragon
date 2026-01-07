@@ -47,6 +47,7 @@
 - [ ] テストが通ることを確認 (`npm test`)
 - [ ] リントエラーがないことを確認 (`npm run lint`)
 - [ ] 型エラーがないことを確認 (`npm run typecheck`)
+- [ ] フォーマットエラーがないことを確認 (`npm run format:check`)
 
 ---
 
