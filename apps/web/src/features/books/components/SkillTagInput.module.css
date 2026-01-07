@@ -1,0 +1,97 @@
+.container {
+  position: relative;
+}
+
+.tagsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--color-bg-base);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  min-height: 42px;
+}
+
+.tagsWrapper:focus-within {
+  border-color: var(--color-exp);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.removeButton:hover {
+  color: var(--color-danger);
+}
+
+.input {
+  flex: 1;
+  min-width: 100px;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  color: var(--color-text);
+  font-family: var(--font-main);
+  font-size: 0.875rem;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.suggestion {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.suggestion:hover,
+.suggestion.active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.loading {
+  padding: 8px 12px;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}

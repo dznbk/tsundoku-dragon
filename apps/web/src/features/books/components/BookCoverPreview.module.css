@@ -1,0 +1,45 @@
+.container {
+  width: 120px;
+  height: 170px;
+  background: linear-gradient(180deg, var(--color-bg-window-light) 0%, var(--color-bg-window-dark) 100%);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholderText {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 150px;
+    height: 213px;
+  }
+}
