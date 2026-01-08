@@ -1,11 +1,17 @@
+import { useState } from 'react';
 import { AuthProvider } from './features/auth/contexts/AuthContext';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { DQWindow } from './components/DQWindow';
+import { DQButton } from './components/DQButton';
 import LoginPage from './pages/LoginPage';
+import { BookRegisterPage } from './pages/BookRegisterPage';
 import styles from './App.module.css';
+
+type Page = 'home' | 'book-register';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
+  const [currentPage, setCurrentPage] = useState<Page>('home');
 
   if (loading) {
     return <div className={styles.loading}>読み込み中...</div>;
@@ -22,6 +28,10 @@ function AppContent() {
       console.error('Logout failed:', error);
     }
   };
+
+  if (currentPage === 'book-register') {
+    return <BookRegisterPage onBack={() => setCurrentPage('home')} />;
+  }
 
   return (
     <div className={styles.app}>
@@ -50,6 +60,11 @@ function AppContent() {
         <p className={styles.welcome}>
           ようこそ、{user.displayName || '冒険者'}！
         </p>
+        <div className={styles.actions}>
+          <DQButton onClick={() => setCurrentPage('book-register')}>
+            本を登録する
+          </DQButton>
+        </div>
       </main>
     </div>
   );
