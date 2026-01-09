@@ -2,11 +2,12 @@
  * DynamoDBテーブル作成スクリプト
  *
  * 使用方法:
- *   npx tsx scripts/create-table.ts [--local]
+ *   npx tsx scripts/create-table.ts [--local] [--test]
  *
  * オプション:
  *   --local  DynamoDB Localに作成（デフォルト）
  *   --prod   AWS本番環境に作成
+ *   --test   統合テスト用テーブルを作成（ローカル環境のみ）
  */
 
 import {
@@ -17,6 +18,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 
 const isLocal = !process.argv.includes('--prod');
+const isTest = process.argv.includes('--test');
 
 const config = isLocal
   ? {
@@ -31,13 +33,25 @@ const config = isLocal
       region: process.env.AWS_REGION || 'ap-northeast-1',
     };
 
-const tableName = isLocal ? 'tsundoku-dragon' : 'tsundoku-dragon-prod';
+function getTableName(): string {
+  if (!isLocal) return 'tsundoku-dragon-prod';
+  if (isTest) return 'tsundoku-dragon-test';
+  return 'tsundoku-dragon';
+}
+
+const tableName = getTableName();
 
 const client = new DynamoDBClient(config);
 
+function getEnvironmentName(): string {
+  if (!isLocal) return 'production';
+  if (isTest) return 'test';
+  return 'local';
+}
+
 async function createTable() {
   console.log(`Creating table: ${tableName}`);
-  console.log(`Environment: ${isLocal ? 'local' : 'production'}`);
+  console.log(`Environment: ${getEnvironmentName()}`);
 
   try {
     await client.send(

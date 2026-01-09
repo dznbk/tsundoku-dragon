@@ -110,7 +110,7 @@ Grep('[機能に関連するキーワード]', 'apps/api/')
 1. 以下のコマンドを順番に実行し、全てのテストがパスすることを確認する。
 
 ```bash
-Bash('npm test')
+Bash('npm run test:all')
 Bash('npm run lint')
 Bash('npm run typecheck')
 Bash('npm run format:check')

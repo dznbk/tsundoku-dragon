@@ -27,29 +27,38 @@
 
 ## ローカル環境のセットアップ
 
-### DynamoDB Local の起動
-
-Docker を使用して DynamoDB Local を起動する：
+### クイックスタート
 
 ```bash
-# DynamoDB Local の起動
-docker run -d -p 8000:8000 amazon/dynamodb-local
+# 1. DynamoDB Local を起動
+npm run db:start
+
+# 2. テスト用テーブルを作成
+npm run db:setup
+
+# 3. 統合テストを実行
+npm run test:integration
+
+# 4. 全テスト（ユニット + 統合）を実行
+npm run test:all
+
+# 5. DynamoDB Local を停止
+npm run db:stop
+```
+
+### DynamoDB Local の起動
+
+Docker Compose を使用して DynamoDB Local を起動する：
+
+```bash
+# npm スクリプトを使用（推奨）
+npm run db:start
+
+# または直接 Docker を使用
+docker compose up -d dynamodb-local
 
 # 起動確認
 aws dynamodb list-tables --endpoint-url http://localhost:8000
-```
-
-### 環境変数の設定
-
-統合テスト用の環境変数を `.env.test` に設定：
-
-```bash
-# .env.test
-AWS_ACCESS_KEY_ID=local
-AWS_SECRET_ACCESS_KEY=local
-AWS_REGION=ap-northeast-1
-DYNAMODB_ENDPOINT=http://localhost:8000
-DYNAMODB_TABLE_NAME=tsundoku-dragon-test
 ```
 
 ### テーブルの作成
@@ -57,16 +66,28 @@ DYNAMODB_TABLE_NAME=tsundoku-dragon-test
 テスト用テーブルを作成するスクリプト：
 
 ```bash
-aws dynamodb create-table \
-  --table-name tsundoku-dragon-test \
-  --attribute-definitions \
-    AttributeName=PK,AttributeType=S \
-    AttributeName=SK,AttributeType=S \
-  --key-schema \
-    AttributeName=PK,KeyType=HASH \
-    AttributeName=SK,KeyType=RANGE \
-  --billing-mode PAY_PER_REQUEST \
-  --endpoint-url http://localhost:8000
+# npm スクリプトを使用（推奨）
+npm run db:setup
+
+# または直接スクリプトを実行
+npx tsx scripts/create-table.ts --local
+```
+
+### 環境変数の設定
+
+統合テスト用の環境変数は `apps/api/src/test-utils/dynamodb-helper.ts` で設定済み：
+
+```typescript
+// dynamodb-helper.ts 内の設定
+export const TEST_CONFIG = {
+  endpoint: 'http://localhost:8000',
+  region: 'ap-northeast-1',
+  tableName: 'tsundoku-dragon-test',
+  credentials: {
+    accessKeyId: 'local',
+    secretAccessKey: 'local',
+  },
+};
 ```
 
 ## テストの実行方法
@@ -74,11 +95,14 @@ aws dynamodb create-table \
 ### コマンド
 
 ```bash
-# 全テスト実行
+# ユニットテストのみ実行
 npm test
 
-# 統合テストのみ実行（ファイル名パターンで絞り込み）
-npm test -- "**/*.integration.test.ts"
+# 統合テストのみ実行
+npm run test:integration
+
+# 全テスト実行（ユニット + 統合）
+npm run test:all
 
 # 特定ファイルのテスト実行
 npm test -- apps/api/src/repositories/bookRepository.integration.test.ts
