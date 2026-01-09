@@ -44,7 +44,7 @@
 
 ## フェーズ3: 品質チェック
 
-- [ ] テストが通ることを確認 (`npm test`)
+- [ ] テストが通ることを確認 (`npm run test:all`)
 - [ ] リントエラーがないことを確認 (`npm run lint`)
 - [ ] 型エラーがないことを確認 (`npm run typecheck`)
 - [ ] フォーマットエラーがないことを確認 (`npm run format:check`)

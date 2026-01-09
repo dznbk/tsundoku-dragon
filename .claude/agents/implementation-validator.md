@@ -263,7 +263,7 @@ npm run typecheck
 ### テスト実行
 
 ```bash
-npm run test
+npm run test:all
 ```
 
 ### ビルド確認
