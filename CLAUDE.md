@@ -20,6 +20,7 @@
 | [planning/screen-design.md](planning/screen-design.md)           | 画面設計・目的             |
 | [planning/visual-design.md](planning/visual-design.md)           | ビジュアルデザイン仕様     |
 | [docs/development-guidelines.md](docs/development-guidelines.md) | 開発ガイドライン           |
+| [docs/integration-testing.md](docs/integration-testing.md)       | 統合テストガイド           |
 | [docs/repository-structure.md](docs/repository-structure.md)     | リポジトリ構造             |
 | [docs/glossary.md](docs/glossary.md)                             | 用語集                     |
 | [docs/CONTEXT.md](docs/CONTEXT.md)                               | 開発コンテキスト・議論ログ |

@@ -60,6 +60,57 @@ E2Eは以下の導線だけ：
 
 - ログイン → 本登録 → 戦闘 → 討伐
 
+### mockの使用方針（デトロイト派）
+
+#### 基本原則
+
+**本物を使えるなら本物を使う**
+
+デトロイト派（古典派）のテスト哲学を採用する。mockは「必要悪」であり、本物のコンポーネントが使えるなら本物を使う。これにより、実際の動作に近いテストが可能になり、リファクタリング耐性が高まる。
+
+#### レイヤー別mock使い分け
+
+| レイヤー      | Unit Tests | Integration Tests   | E2E Tests    |
+| ------------- | ---------- | ------------------- | ------------ |
+| Repository    | Mock       | **Real (Local DB)** | Real         |
+| Service       | Real       | Real                | Real         |
+| External API  | Mock       | Mock                | Real or Mock |
+| Firebase Auth | Mock       | Mock                | Real         |
+
+#### 判断基準
+
+mockするかどうかは以下の基準で判断する：
+
+| 基準           | 本物を使う                   | mockする                    |
+| -------------- | ---------------------------- | --------------------------- |
+| **制御可能性** | DynamoDB Local, インメモリDB | 外部SaaS, サードパーティAPI |
+| **コスト**     | 無料・低コスト               | 課金が発生する処理          |
+| **副作用**     | ローカルで完結               | メール送信, SMS, 外部通知   |
+| **速度**       | 十分高速                     | ネットワーク遅延が大きい    |
+| **決定性**     | 結果が常に同じ               | ランダム性がある, 時刻依存  |
+
+#### 具体例
+
+```typescript
+// ✅ Good: DynamoDB Localを使った統合テスト
+describe('BookRepository Integration', () => {
+  // 本物のDynamoDB Localに接続
+  const repository = new BookRepository(localEnv);
+
+  it('本を保存して取得できる', async () => {
+    await repository.save(testBook);
+    const result = await repository.findById(userId, bookId);
+    expect(result).toEqual(testBook);
+  });
+});
+
+// ✅ Good: 外部APIはmock
+vi.mock('@hono/firebase-auth'); // Firebase Authはmock
+vi.mock('../lib/openbd'); // 外部書籍APIはmock
+```
+
+詳細は [統合テストガイド](./integration-testing.md) を参照。
+
 ## コーディング規約
 
 ### 全般
