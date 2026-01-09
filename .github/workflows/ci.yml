@@ -51,3 +51,33 @@ jobs:
       - run: npm ci
       - name: Build
         run: npm run build
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local:latest
+        ports:
+          - 8000:8000
+        options: >-
+          --health-cmd "curl -s http://localhost:8000 > /dev/null"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Create test table
+        run: npx tsx scripts/create-table.ts --local --test
+        env:
+          AWS_ACCESS_KEY_ID: local
+          AWS_SECRET_ACCESS_KEY: local
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DYNAMODB_ENDPOINT: http://localhost:8000
