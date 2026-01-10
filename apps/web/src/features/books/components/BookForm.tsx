@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import {
   titleAtom,
   isbnAtom,
@@ -9,10 +9,13 @@ import {
   coverUrlAtom,
   bookInfoLoadingAtom,
   formDataAtom,
+  applySearchResultAtom,
 } from '../stores/bookFormAtoms';
 import { useBookInfo } from '../hooks/useBookInfo';
 import { BookCoverPreview } from './BookCoverPreview';
 import { SkillTagInput } from './SkillTagInput';
+import { TitleSearchInput } from './TitleSearchInput';
+import type { NdlBookSearchResult } from '../services/ndlApi';
 import { DQButton } from '../../../components/DQButton';
 import styles from './BookForm.module.css';
 
@@ -43,9 +46,14 @@ export function BookForm({
   const [coverUrl] = useAtom(coverUrlAtom);
   const [isLoadingBookInfo] = useAtom(bookInfoLoadingAtom);
   const [formData] = useAtom(formDataAtom);
+  const applySearchResult = useSetAtom(applySearchResultAtom);
 
   // ISBN入力時の自動取得
   useBookInfo();
+
+  const handleSearchResultSelect = (result: NdlBookSearchResult) => {
+    applySearchResult(result);
+  };
 
   const validate = (): boolean => {
     const newErrors: { title?: string; totalPages?: string } = {};
@@ -87,15 +95,11 @@ export function BookForm({
             <label htmlFor="title" className={styles.label}>
               タイトル <span className={styles.required}>*</span>
             </label>
-            <input
-              id="title"
-              type="text"
+            <TitleSearchInput
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={styles.input}
-              aria-required="true"
-              aria-invalid={!!errors.title}
-              aria-describedby={errors.title ? 'title-error' : undefined}
+              onChange={setTitle}
+              onSelect={handleSearchResultSelect}
+              error={errors.title}
             />
             {errors.title && (
               <p id="title-error" className={styles.errorMessage} role="alert">
