@@ -6,7 +6,7 @@ export type { AuthContextValue } from './contexts/AuthContext';
 export { useAuth } from './hooks/useAuth';
 
 // Components
-export { LoginButton } from './components/LoginButton';
+export { GoogleLoginButton } from './components/GoogleLoginButton';
 export { ProtectedRoute } from './components/ProtectedRoute';
 
 // Services

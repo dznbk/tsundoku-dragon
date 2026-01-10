@@ -31,54 +31,6 @@
   gap: 16px;
 }
 
-.loginButton {
-  background: linear-gradient(
-    180deg,
-    var(--color-bg-window-light) 0%,
-    var(--color-bg-window-dark) 100%
-  );
-  border: 3px solid var(--color-border);
-  border-radius: 8px;
-  padding: 12px 24px;
-  color: var(--color-text);
-  font-family: var(--font-main);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.1s ease;
-  width: 100%;
-}
-
-.loginButton:hover:not(:disabled) {
-  background: linear-gradient(
-    180deg,
-    var(--color-bg-window-light-hover) 0%,
-    var(--color-bg-window-dark-hover) 100%
-  );
-}
-
-.loginButton:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.loginButton:focus-visible {
-  outline: 2px solid var(--color-exp);
-  outline-offset: 2px;
-}
-
-.loginButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error {
-  color: var(--color-danger);
-  margin-top: 16px;
-  font-size: 0.875rem;
-}
-
 /* Responsive */
 @media (min-width: 640px) {
   .container {

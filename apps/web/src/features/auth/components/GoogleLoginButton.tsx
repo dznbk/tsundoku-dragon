@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import styles from './LoginButton.module.css';
+import styles from './GoogleLoginButton.module.css';
 
-interface LoginButtonProps {
-  provider: 'google';
+interface GoogleLoginButtonProps {
   className?: string;
 }
 
-export function LoginButton({ provider, className }: LoginButtonProps) {
+export function GoogleLoginButton({ className }: GoogleLoginButtonProps) {
   const { signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,9 +15,7 @@ export function LoginButton({ provider, className }: LoginButtonProps) {
     setLoading(true);
     setError(null);
     try {
-      if (provider === 'google') {
-        await signInWithGoogle();
-      }
+      await signInWithGoogle();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ログインに失敗しました');
     } finally {
@@ -26,21 +23,26 @@ export function LoginButton({ provider, className }: LoginButtonProps) {
     }
   };
 
-  const getButtonText = () => {
-    if (loading) return 'ログイン中...';
-    if (provider === 'google') return 'Googleでログイン';
-    return 'ログイン';
-  };
-
   return (
-    <div>
+    <div className={className}>
       <button
         onClick={handleClick}
         disabled={loading}
-        className={className}
+        className={styles.button}
         type="button"
+        aria-label="Googleでログイン"
       >
-        {getButtonText()}
+        <span className={styles.logoContainer}>
+          <img
+            src="/assets/google-g-logo.svg"
+            alt=""
+            className={styles.logo}
+            aria-hidden="true"
+          />
+        </span>
+        <span className={styles.text}>
+          {loading ? 'ログイン中...' : 'Googleでログイン'}
+        </span>
       </button>
       {error && (
         <p className={styles.error} role="alert" aria-live="assertive">
