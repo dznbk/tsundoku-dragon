@@ -49,10 +49,10 @@ describe('ndlApi', () => {
     it('タイトルで検索して書籍候補を返す', async () => {
       const xml = createMockXmlResponse(`
         <item>
-          <title>わかばちゃんと学ぶGit使い方入門</title>
-          <author>湊川 あい</author>
-          <identifier>ISBN:9784863542174</identifier>
-          <extent>278p</extent>
+          <title>テスト書籍タイトル</title>
+          <author>テスト著者</author>
+          <identifier>ISBN:9784123456789</identifier>
+          <extent>256p</extent>
         </item>
       `);
 
@@ -61,15 +61,15 @@ describe('ndlApi', () => {
         text: () => Promise.resolve(xml),
       } as unknown as Response);
 
-      const results = await fetchBooksByTitle('わかばちゃん');
+      const results = await fetchBooksByTitle('テスト');
 
       expect(results).toHaveLength(1);
       expect(results[0]).toEqual({
-        title: 'わかばちゃんと学ぶGit使い方入門',
-        author: '湊川 あい',
-        isbn: '9784863542174',
-        totalPages: 278,
-        coverUrl: 'https://ndlsearch.ndl.go.jp/thumbnail/9784863542174.jpg',
+        title: 'テスト書籍タイトル',
+        author: 'テスト著者',
+        isbn: '9784123456789',
+        totalPages: 256,
+        coverUrl: 'https://ndlsearch.ndl.go.jp/thumbnail/9784123456789.jpg',
       });
     });
 

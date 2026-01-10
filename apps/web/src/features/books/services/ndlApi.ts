@@ -1,4 +1,5 @@
 export interface NdlBookInfo {
+  title: string | null;
   totalPages: number | null;
   coverUrl: string | null;
 }
@@ -15,7 +16,7 @@ export async function fetchBookInfoByIsbn(isbn: string): Promise<NdlBookInfo> {
   const cleanIsbn = isbn.replace(/-/g, '');
 
   if (!cleanIsbn || !/^\d{10}$|^\d{13}$/.test(cleanIsbn)) {
-    return { totalPages: null, coverUrl: null };
+    return { title: null, totalPages: null, coverUrl: null };
   }
 
   const url = `https://ndlsearch.ndl.go.jp/api/opensearch?isbn=${cleanIsbn}`;
@@ -23,12 +24,15 @@ export async function fetchBookInfoByIsbn(isbn: string): Promise<NdlBookInfo> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      return { totalPages: null, coverUrl: null };
+      return { title: null, totalPages: null, coverUrl: null };
     }
 
     const xmlText = await response.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlText, 'text/xml');
+
+    // タイトル抽出
+    const title = doc.querySelector('item title')?.textContent ?? null;
 
     // ページ数抽出
     const extent = doc.querySelector('extent')?.textContent;
@@ -38,9 +42,9 @@ export async function fetchBookInfoByIsbn(isbn: string): Promise<NdlBookInfo> {
     // 書影URL
     const coverUrl = `https://ndlsearch.ndl.go.jp/thumbnail/${cleanIsbn}.jpg`;
 
-    return { totalPages, coverUrl };
+    return { title, totalPages, coverUrl };
   } catch {
-    return { totalPages: null, coverUrl: null };
+    return { title: null, totalPages: null, coverUrl: null };
   }
 }
 
@@ -94,7 +98,13 @@ function extractIsbnFromItem(item: Element): string | null {
   for (const id of identifiers) {
     const text = id.textContent;
     if (text) {
-      // ISBN-13またはISBN-10のパターン
+      // ハイフン付きISBN-13パターン（例: 978-4-297-15354-0）
+      const hyphenatedMatch = text.match(/(\d{3}-\d+-\d+-\d+-\d)/);
+      if (hyphenatedMatch) {
+        // ハイフンを除去して返す
+        return hyphenatedMatch[1].replace(/-/g, '');
+      }
+      // ハイフンなしISBN-13またはISBN-10のパターン
       const isbnMatch = text.match(/(\d{13}|\d{10})/);
       if (isbnMatch) {
         return isbnMatch[1];
