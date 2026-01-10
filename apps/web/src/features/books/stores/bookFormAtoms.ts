@@ -48,3 +48,29 @@ export const resetFormAtom = atom(null, (_get, set) => {
   set(submitErrorAtom, null);
   set(successMessageAtom, null);
 });
+
+// 検索結果選択時の自動入力アクション
+export const applySearchResultAtom = atom(
+  null,
+  (
+    _get,
+    set,
+    result: {
+      title: string;
+      isbn: string | null;
+      totalPages: number | null;
+      coverUrl: string | null;
+    }
+  ) => {
+    set(titleAtom, result.title);
+    if (result.isbn) {
+      set(isbnAtom, result.isbn);
+    }
+    if (result.totalPages) {
+      set(totalPagesAtom, String(result.totalPages));
+    }
+    if (result.coverUrl) {
+      set(coverUrlAtom, result.coverUrl);
+    }
+  }
+);

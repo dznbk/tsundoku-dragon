@@ -1,5 +1,6 @@
 import { DescribeTableCommand } from '@aws-sdk/client-dynamodb';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 
 import { createDynamoDBClient, type Env } from './lib/dynamodb';
 import { authMiddleware } from './middleware/auth';
@@ -7,6 +8,16 @@ import books from './routes/books';
 import skills from './routes/skills';
 
 const app = new Hono<{ Bindings: Env }>();
+
+// CORS設定（OPTIONSプリフライトリクエストを許可）
+app.use(
+  '*',
+  cors({
+    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // 認証が必要なルートにミドルウェアを適用
 app.use('/books', authMiddleware);
