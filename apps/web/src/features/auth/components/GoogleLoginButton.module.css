@@ -1,0 +1,65 @@
+/* Google Sign-In Branding Guidelines準拠 - ダークテーマ */
+.button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background-color: #131314;
+  border: 1px solid #8e918f;
+  border-radius: 4px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #e3e3e3;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #1f1f1f;
+  border-color: #a0a0a0;
+}
+
+.button:active:not(:disabled) {
+  background-color: #2a2a2a;
+}
+
+.button:focus-visible {
+  outline: 2px solid #8ab4f8;
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.logoContainer {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 18px;
+  height: 18px;
+}
+
+.text {
+  flex: 1;
+  text-align: center;
+}
+
+.error {
+  color: var(--color-danger);
+  margin-top: 8px;
+  font-size: 0.875rem;
+}

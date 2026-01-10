@@ -1,4 +1,4 @@
-import { LoginButton } from '../features/auth/components/LoginButton';
+import { GoogleLoginButton } from '../features/auth/components/GoogleLoginButton';
 import { DQWindow } from '../components/DQWindow';
 import styles from './LoginPage.module.css';
 
@@ -13,7 +13,7 @@ export default function LoginPage() {
         />
         <p className={styles.tagline}>積ん読を討伐せよ！</p>
         <div className={styles.buttons}>
-          <LoginButton provider="google" className={styles.loginButton} />
+          <GoogleLoginButton />
         </div>
       </DQWindow>
     </div>
