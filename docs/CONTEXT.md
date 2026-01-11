@@ -75,11 +75,18 @@
 - Firebaseコンソール設定（プロジェクト作成、Google認証有効化）
 - フロントエンド認証基盤（Firebase SDK、AuthContext、ProtectedRoute、authApi）
 - UI/デザイン改修（visual-design.md準拠、DQウィンドウ/ボタンコンポーネント、ロゴ配置）
+- 本の登録画面（BookRegisterPage、BookForm、SkillTagInput、BookCoverPreview、Jotai統合）
+- テストポリシードキュメント（docs/integration-testing.md）
+- DynamoDB Local統合テスト基盤（Vitest統合、setupFiles）
+- BookRepository統合テスト
+- CI統合テスト（GitHub Actions対応）
+- Googleログインブランディング（GoogleLoginButton、Googleロゴ）
+- continue-featureコマンド（フィードバック対応ワークフロー）
+- タイトル検索機能（TitleSearchInput、NDL API、useTitleSearch）
 
 ### 次にやること
 
-1. 本の登録画面
-2. ホーム画面（本一覧）
+1. ホーム画面（本一覧）
 
 ### スキップ
 
@@ -141,6 +148,263 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-11 タイトル検索機能
+
+**実施した内容：**
+
+- 本の登録画面にタイトルから書籍を検索できる機能を追加
+- NDL OpenSearch APIを使用したインクリメンタル検索
+- 検索候補から選択してISBN・ページ数・書影を自動入力
+
+**作成・修正したファイル：**
+
+| ファイル                                                      | 内容                           |
+| ------------------------------------------------------------- | ------------------------------ |
+| `apps/web/src/features/books/components/TitleSearchInput.tsx` | タイトル検索入力コンポーネント |
+| `apps/web/src/features/books/hooks/useTitleSearch.ts`         | タイトル検索フック             |
+| `apps/web/src/features/books/services/ndlApi.ts`              | NDL OpenSearch API拡張         |
+| `apps/web/src/features/books/stores/bookFormAtoms.ts`         | 検索状態管理（Jotai）          |
+| `apps/web/src/features/books/components/BookForm.tsx`         | TitleSearchInput統合           |
+| `apps/api/src/index.ts`                                       | CORSミドルウェア追加           |
+
+**技術的な決定：**
+
+| 決定                            | 理由                                  |
+| ------------------------------- | ------------------------------------- |
+| フロントから直接NDL API呼び出し | NDL APIはCORSを許可済み、プロキシ不要 |
+| debounce 500ms                  | 既存のISBN検索と統一                  |
+| 検索結果10件制限                | パフォーマンスとUX考慮                |
+| 資料種別フィルタリング          | 書籍以外（映像・音声等）を除外        |
+| キーボード操作対応              | ↑↓Enterで候補選択可能                 |
+
+**学び：**
+
+- NDL OpenSearch APIはRSS形式のため、XMLパース処理が必要
+- `xml2js`よりもブラウザ標準の`DOMParser`の方が軽量
+- CORSエラー対応でOPTIONSプリフライトリクエストを適切に処理する必要がある
+
+---
+
+### 2026-01-11 continue-featureコマンド
+
+**実施した内容：**
+
+- 実装後のフィードバック対応ワークフローを定義する`/continue-feature`コマンドを追加
+- 既存ステアリングを参照して追加タスクを管理できるようにした
+- steeringスキルにフィードバック対応の運用ルールを追記
+
+**作成・修正したファイル：**
+
+| ファイル                               | 内容                         |
+| -------------------------------------- | ---------------------------- |
+| `.claude/commands/continue-feature.md` | continue-featureコマンド定義 |
+| `.claude/skills/steering/SKILL.md`     | フィードバック対応ルール追記 |
+
+**決定事項：**
+
+| 決定                             | 理由                                     |
+| -------------------------------- | ---------------------------------------- |
+| 軽微な修正は直接実装             | ステアリング作成のオーバーヘッドを避ける |
+| 継続作業は既存ステアリングに追記 | 関連タスクをまとめて管理                 |
+| 判断基準を明文化                 | 迷わず判断できるように                   |
+
+**学び：**
+
+- `/add-feature`は新規機能、`/continue-feature`は既存機能の改善と明確に分離
+- ステアリングファイルは作業履歴としても機能する
+
+---
+
+### 2026-01-10 Googleログインブランディング
+
+**実施した内容：**
+
+- Google Sign-In Branding Guidelinesに準拠したログインボタンデザインに変更
+- Google公式「G」ロゴを使用
+- ボタンテキストを「Googleでログイン」に統一
+
+**作成・修正したファイル：**
+
+| ファイル                                                        | 内容                   |
+| --------------------------------------------------------------- | ---------------------- |
+| `apps/web/src/features/auth/components/GoogleLoginButton.tsx`   | ガイドライン準拠ボタン |
+| `apps/web/public/assets/google-g-logo.svg`                      | Google公式ロゴSVG      |
+| `apps/web/src/features/auth/components/LoginButton.tsx`（削除） | 旧ボタンコンポーネント |
+
+**技術的な決定：**
+
+| 決定                   | 理由                            |
+| ---------------------- | ------------------------------- |
+| コンポーネント名を変更 | LoginButton → GoogleLoginButton |
+| Google公式ロゴを使用   | ブランドガイドライン準拠        |
+| 白背景ロゴボックス     | ダークモードでも視認性確保      |
+
+**学び：**
+
+- 外部サービスのブランドガイドラインは必ず確認すべき
+- ロゴは公式のものを使用し、勝手に色を変えない
+
+---
+
+### 2026-01-10 CI統合テスト
+
+**実施した内容：**
+
+- GitHub ActionsのCIパイプラインで統合テストを実行できるように設定
+- DynamoDB Localをサービスコンテナで起動
+
+**作成・修正したファイル：**
+
+| ファイル                   | 内容                       |
+| -------------------------- | -------------------------- |
+| `.github/workflows/ci.yml` | DynamoDB Localサービス追加 |
+
+**技術的な決定：**
+
+| 決定                         | 理由                           |
+| ---------------------------- | ------------------------------ |
+| DynamoDB LocalをDockerで起動 | CIでもローカルと同じ環境で実行 |
+| 既存のテストステップに統合   | 新しいジョブを作らずシンプルに |
+
+**学び：**
+
+- GitHub Actionsの`services`でDynamoDB Localを起動できる
+- ローカルとCIで同じテスト環境を保つことが重要
+
+---
+
+### 2026-01-10 BookRepository統合テスト
+
+**実施した内容：**
+
+- `BookRepository`の統合テストを作成
+- 実際のDynamoDB Localに対してCRUD操作を検証
+
+**作成したファイル：**
+
+| ファイル                                                       | 内容                     |
+| -------------------------------------------------------------- | ------------------------ |
+| `apps/api/src/repositories/bookRepository.integration.test.ts` | BookRepository統合テスト |
+
+**技術的な決定：**
+
+| 決定                               | 理由                   |
+| ---------------------------------- | ---------------------- |
+| `.integration.test.ts`サフィックス | 統合テストを明示       |
+| afterEachでテストデータクリア      | テスト間の独立性を保つ |
+
+**学び：**
+
+- 実際のDynamoDBに対するテストで、スキーマ設計の問題を早期発見できる
+- テストデータのクリーンアップを忘れずに
+
+---
+
+### 2026-01-10 DynamoDB Local統合テスト基盤
+
+**実施した内容：**
+
+- Vitestで統合テストを実行するための基盤を整備
+- DynamoDB Localとの接続設定、テーブル作成スクリプト
+
+**作成・修正したファイル：**
+
+| ファイル                                 | 内容                       |
+| ---------------------------------------- | -------------------------- |
+| `apps/api/vitest.integration.config.ts`  | 統合テスト用Vitest設定     |
+| `apps/api/src/test/setup-integration.ts` | 統合テストセットアップ     |
+| `apps/api/src/test/helpers/dynamodb.ts`  | テストヘルパー関数         |
+| `apps/api/package.json`                  | test:integrationスクリプト |
+
+**技術的な決定：**
+
+| 決定                           | 理由                   |
+| ------------------------------ | ---------------------- |
+| 統合テスト用の別設定ファイル   | ユニットテストと分離   |
+| setupFilesでテーブル作成       | テスト前に環境を整える |
+| DynamoDB Localをlocalhost:8000 | デフォルトポートを使用 |
+
+**学び：**
+
+- Vitestの`setupFiles`でテスト前処理を実行できる
+- テーブル作成はべき等性を持たせる（既存テーブルは削除してから作成）
+
+---
+
+### 2026-01-10 テストポリシードキュメント
+
+**実施した内容：**
+
+- mockの使用方針と統合テストの位置づけを明確化
+- デトロイト派の考え方を文書化
+- 統合テストの実行方法とデバッグ方法を記載
+
+**作成・修正したファイル：**
+
+| ファイル                         | 内容               |
+| -------------------------------- | ------------------ |
+| `docs/integration-testing.md`    | 統合テストガイド   |
+| `docs/development-guidelines.md` | mockの使用方針追記 |
+
+**決定事項：**
+
+| 決定                         | 理由                     |
+| ---------------------------- | ------------------------ |
+| デトロイト派を採用           | 本物を使えるなら使うべき |
+| レイヤー別に方針を明文化     | 判断に迷わない           |
+| DynamoDB Localの制限事項記載 | 後で困らないように       |
+
+**学び：**
+
+- テスト方針を明文化することでチーム全体の品質基準が統一される
+- mockの使い分けは「制御可能性」と「コスト」で判断
+
+---
+
+### 2026-01-09 本の登録画面
+
+**実施した内容：**
+
+- 本の登録フォーム画面を実装
+- ISBN入力で書影・ページ数を自動取得（NDL API）
+- スキルタグ入力（オートコンプリート）
+- Jotaiによる状態管理
+
+**作成したファイル：**
+
+| ファイル                                                      | 内容                      |
+| ------------------------------------------------------------- | ------------------------- |
+| `apps/web/src/pages/BookRegisterPage.tsx`                     | 本の登録ページ            |
+| `apps/web/src/features/books/components/BookForm.tsx`         | 本登録フォーム            |
+| `apps/web/src/features/books/components/SkillTagInput.tsx`    | スキルタグ入力            |
+| `apps/web/src/features/books/components/BookCoverPreview.tsx` | 書影プレビュー            |
+| `apps/web/src/features/books/hooks/useBookInfo.ts`            | ISBN→書籍情報取得フック   |
+| `apps/web/src/features/books/hooks/useSkillSuggestions.ts`    | スキル候補取得フック      |
+| `apps/web/src/features/books/services/ndlApi.ts`              | NDL API クライアント      |
+| `apps/web/src/features/books/services/bookApi.ts`             | 本登録APIクライアント     |
+| `apps/web/src/features/books/stores/bookFormAtoms.ts`         | フォーム状態管理（Jotai） |
+| `apps/api/src/routes/skills.ts`                               | スキル取得API             |
+| `apps/api/src/services/skillService.ts`                       | スキルサービス層          |
+| `apps/api/src/repositories/skillRepository.ts`                | スキルリポジトリ層        |
+
+**技術的な決定：**
+
+| 決定                        | 理由                                       |
+| --------------------------- | ------------------------------------------ |
+| Jotaiで状態管理             | シンプル、Reactと相性が良い                |
+| Feature-based構造           | books関連ファイルを`features/books/`に集約 |
+| hooks/services/storesで分離 | 関心事の分離                               |
+| NDL APIで書影取得           | 無料、ISBN→書影URLが取得可能               |
+| debounce 500ms              | API負荷軽減、UX向上                        |
+
+**学び：**
+
+- Jotaiのatomは小さく分割すると再レンダリングが最適化される
+- NDL APIはISBN-10/13どちらでも検索可能
+- スキルのオートコンプリートはユーザビリティ向上に有効
+
+---
 
 ### 2026-01-06 UI/デザイン改修（visual-design.md準拠）
 
