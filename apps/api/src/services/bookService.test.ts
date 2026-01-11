@@ -18,6 +18,18 @@ vi.mock('../repositories/bookRepository', () => ({
   },
 }));
 
+const mockHasGlobalSkill = vi.fn();
+const mockHasUserCustomSkill = vi.fn();
+const mockSaveUserCustomSkill = vi.fn();
+
+vi.mock('../repositories/skillRepository', () => ({
+  SkillRepository: class {
+    hasGlobalSkill = mockHasGlobalSkill;
+    hasUserCustomSkill = mockHasUserCustomSkill;
+    saveUserCustomSkill = mockSaveUserCustomSkill;
+  },
+}));
+
 describe('BookService', () => {
   const mockEnv = {
     AWS_ACCESS_KEY_ID: 'test',
@@ -109,6 +121,82 @@ describe('BookService', () => {
       await service.createBook('user-123', input);
 
       expect(mockSave).toHaveBeenCalledOnce();
+    });
+
+    describe('カスタムスキル自動登録', () => {
+      it('新規スキルをカスタムスキルとして登録する', async () => {
+        mockHasGlobalSkill.mockResolvedValue(false);
+        mockHasUserCustomSkill.mockResolvedValue(false);
+
+        await service.createBook('user-123', {
+          title: 'テスト本',
+          totalPages: 100,
+          skills: ['ニッチな技術'],
+        });
+
+        expect(mockHasGlobalSkill).toHaveBeenCalledWith('ニッチな技術');
+        expect(mockHasUserCustomSkill).toHaveBeenCalledWith(
+          'user-123',
+          'ニッチな技術'
+        );
+        expect(mockSaveUserCustomSkill).toHaveBeenCalledWith(
+          'user-123',
+          'ニッチな技術'
+        );
+      });
+
+      it('グローバルスキルに存在する場合はカスタムスキルに登録しない', async () => {
+        mockHasGlobalSkill.mockResolvedValue(true);
+
+        await service.createBook('user-123', {
+          title: 'テスト本',
+          totalPages: 100,
+          skills: ['TypeScript'],
+        });
+
+        expect(mockHasGlobalSkill).toHaveBeenCalledWith('TypeScript');
+        expect(mockHasUserCustomSkill).not.toHaveBeenCalled();
+        expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
+      });
+
+      it('カスタムスキルに既に存在する場合は重複登録しない', async () => {
+        mockHasGlobalSkill.mockResolvedValue(false);
+        mockHasUserCustomSkill.mockResolvedValue(true);
+
+        await service.createBook('user-123', {
+          title: 'テスト本',
+          totalPages: 100,
+          skills: ['既存のカスタムスキル'],
+        });
+
+        expect(mockHasGlobalSkill).toHaveBeenCalledWith('既存のカスタムスキル');
+        expect(mockHasUserCustomSkill).toHaveBeenCalledWith(
+          'user-123',
+          '既存のカスタムスキル'
+        );
+        expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
+      });
+
+      it('スキルが空の場合は何もしない', async () => {
+        await service.createBook('user-123', {
+          title: 'テスト本',
+          totalPages: 100,
+          skills: [],
+        });
+
+        expect(mockHasGlobalSkill).not.toHaveBeenCalled();
+        expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
+      });
+
+      it('skillsが未指定の場合は何もしない', async () => {
+        await service.createBook('user-123', {
+          title: 'テスト本',
+          totalPages: 100,
+        });
+
+        expect(mockHasGlobalSkill).not.toHaveBeenCalled();
+        expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
+      });
     });
   });
 
