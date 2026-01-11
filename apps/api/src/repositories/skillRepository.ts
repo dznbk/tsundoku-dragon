@@ -1,4 +1,4 @@
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { createDynamoDBClient, type Env } from '../lib/dynamodb';
 
 export interface GlobalSkill {
@@ -52,5 +52,47 @@ export class SkillRepository {
       name: (item.SK as string).replace('CUSTOM_SKILL#', ''),
       createdAt: item.createdAt as string,
     }));
+  }
+
+  async hasGlobalSkill(skillName: string): Promise<boolean> {
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: {
+          PK: 'GLOBAL',
+          SK: `SKILL#${skillName}`,
+        },
+      })
+    );
+    return result.Item !== undefined;
+  }
+
+  async hasUserCustomSkill(
+    userId: string,
+    skillName: string
+  ): Promise<boolean> {
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: {
+          PK: `USER#${userId}`,
+          SK: `CUSTOM_SKILL#${skillName}`,
+        },
+      })
+    );
+    return result.Item !== undefined;
+  }
+
+  async saveUserCustomSkill(userId: string, skillName: string): Promise<void> {
+    await this.client.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: {
+          PK: `USER#${userId}`,
+          SK: `CUSTOM_SKILL#${skillName}`,
+          createdAt: new Date().toISOString(),
+        },
+      })
+    );
   }
 }
