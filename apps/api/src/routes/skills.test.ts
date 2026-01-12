@@ -4,11 +4,13 @@ import skills from './skills';
 
 const mockFindGlobalSkills = vi.fn();
 const mockFindUserCustomSkills = vi.fn();
+const mockFindUserSkillExps = vi.fn();
 
 vi.mock('../repositories/skillRepository', () => ({
   SkillRepository: class {
     findGlobalSkills = mockFindGlobalSkills;
     findUserCustomSkills = mockFindUserCustomSkills;
+    findUserSkillExps = mockFindUserSkillExps;
   },
 }));
 
@@ -44,6 +46,9 @@ describe('Skills Routes', () => {
       mockFindUserCustomSkills.mockResolvedValueOnce([
         { name: 'MySkill', createdAt: '2024-01-01T00:00:00Z' },
       ]);
+      mockFindUserSkillExps.mockResolvedValueOnce([
+        { name: 'React', exp: 100, level: 2 },
+      ]);
 
       const res = await app.request('/skills', {}, mockEnv);
 
@@ -51,14 +56,19 @@ describe('Skills Routes', () => {
       const body = (await res.json()) as {
         globalSkills: string[];
         userSkills: string[];
+        userSkillExps: Array<{ name: string; exp: number; level: number }>;
       };
       expect(body.globalSkills).toEqual(['React', 'TypeScript']);
       expect(body.userSkills).toEqual(['MySkill']);
+      expect(body.userSkillExps).toEqual([
+        { name: 'React', exp: 100, level: 2 },
+      ]);
     });
 
     it('空のスキル一覧を返す', async () => {
       mockFindGlobalSkills.mockResolvedValueOnce([]);
       mockFindUserCustomSkills.mockResolvedValueOnce([]);
+      mockFindUserSkillExps.mockResolvedValueOnce([]);
 
       const res = await app.request('/skills', {}, mockEnv);
 
@@ -66,9 +76,11 @@ describe('Skills Routes', () => {
       const body = (await res.json()) as {
         globalSkills: string[];
         userSkills: string[];
+        userSkillExps: Array<{ name: string; exp: number; level: number }>;
       };
       expect(body.globalSkills).toEqual([]);
       expect(body.userSkills).toEqual([]);
+      expect(body.userSkillExps).toEqual([]);
     });
   });
 });

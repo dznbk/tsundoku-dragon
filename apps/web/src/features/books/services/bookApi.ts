@@ -53,3 +53,22 @@ export async function createBook(
 
   return response.json();
 }
+
+export async function getBooks(user: User): Promise<Book[]> {
+  const token = await user.getIdToken();
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+
+  const response = await fetch(`${apiUrl}/books`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new ApiError('Failed to fetch books', response.status);
+  }
+
+  const data = await response.json();
+  return data.books;
+}

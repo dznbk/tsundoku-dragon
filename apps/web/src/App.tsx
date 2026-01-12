@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { AuthProvider } from './features/auth/contexts/AuthContext';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { DQWindow } from './components/DQWindow';
-import { DQButton } from './components/DQButton';
 import LoginPage from './pages/LoginPage';
 import { BookRegisterPage } from './pages/BookRegisterPage';
+import { HomePage } from './pages/HomePage';
 import styles from './App.module.css';
 
 type Page = 'home' | 'book-register';
@@ -57,14 +57,9 @@ function AppContent() {
         </div>
       </DQWindow>
       <main className={styles.main}>
-        <p className={styles.welcome}>
-          ようこそ、{user.displayName || '冒険者'}！
-        </p>
-        <div className={styles.actions}>
-          <DQButton onClick={() => setCurrentPage('book-register')}>
-            本を登録する
-          </DQButton>
-        </div>
+        <HomePage
+          onNavigateToRegister={() => setCurrentPage('book-register')}
+        />
       </main>
     </div>
   );

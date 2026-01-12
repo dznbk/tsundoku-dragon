@@ -11,6 +11,12 @@ export interface UserSkill {
   createdAt: string;
 }
 
+export interface UserSkillExp {
+  name: string;
+  exp: number;
+  level: number;
+}
+
 export class SkillRepository {
   private client;
   private tableName: string;
@@ -94,5 +100,23 @@ export class SkillRepository {
         },
       })
     );
+  }
+
+  async findUserSkillExps(userId: string): Promise<UserSkillExp[]> {
+    const result = await this.client.send(
+      new QueryCommand({
+        TableName: this.tableName,
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skPrefix)',
+        ExpressionAttributeValues: {
+          ':pk': `USER#${userId}`,
+          ':skPrefix': 'SKILL#',
+        },
+      })
+    );
+    return (result.Items ?? []).map((item) => ({
+      name: (item.SK as string).replace('SKILL#', ''),
+      exp: (item.exp as number) ?? 0,
+      level: (item.level as number) ?? 1,
+    }));
   }
 }
