@@ -25,19 +25,27 @@
 | [docs/glossary.md](docs/glossary.md)                             | 用語集                     |
 | [docs/CONTEXT.md](docs/CONTEXT.md)                               | 開発コンテキスト・議論ログ |
 
-## よく使うコマンド
+## Taskfile
+
+プロジェクトルートの `Taskfile` で開発タスクを実行する。
 
 ```bash
-# 開発サーバー
-npm run dev              # ルートから全体起動
-cd apps/web && npm run dev   # フロントのみ
-cd apps/api && npm run dev   # APIのみ
-
-# テスト・検証
-npm run test             # テスト実行
-npm run typecheck        # 型チェック
-npm run lint             # リント
+./Taskfile setup            # 初期セットアップ（npm install、.envコピー）
+./Taskfile dev              # 全サービス起動（DB + api + web）
+./Taskfile check            # CI相当のローカルチェック（push前に実行）
+./Taskfile test             # ユニットテスト
+./Taskfile test:integration # 統合テスト
+./Taskfile test:all         # 全テスト
+./Taskfile db:start         # DynamoDB Local 起動
+./Taskfile db:stop          # DynamoDB Local 停止
 ```
+
+**使う場面:**
+
+- 新規開発者の環境構築 → `./Taskfile setup`
+- 日常の開発 → `./Taskfile dev`
+- コミット/プッシュ前の確認 → `./Taskfile check`
+- 統合テスト実行前 → `./Taskfile test:setup`
 
 ## 重要なルール
 

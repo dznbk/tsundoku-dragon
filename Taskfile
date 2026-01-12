@@ -1,0 +1,72 @@
+#!/bin/bash
+PATH=./node_modules/.bin:$PATH
+
+function setup {
+    echo "==> Installing dependencies..."
+    npm install
+
+    # .env ファイルのコピー（存在しなければ）
+    if [ ! -f apps/web/.env ]; then
+        echo "==> Copying .env.example to .env (apps/web)"
+        cp apps/web/.env.example apps/web/.env
+        echo "    Please edit apps/web/.env with your Firebase credentials"
+    fi
+
+    # ツール確認
+    echo "==> Environment check:"
+    echo "    Node: $(node -v)"
+    echo "    npm: $(npm -v)"
+    echo "    Docker: $(docker -v 2>/dev/null || echo 'not found')"
+}
+
+function dev {
+    # DB起動 → api + web を並列起動
+    db:start
+    trap 'db:stop' EXIT  # 終了時にDB停止
+    npm run dev:api & npm run dev:web & wait
+}
+
+function test:setup {
+    ./scripts/setup-integration-tests.sh
+}
+
+function test {
+    npm test
+}
+
+function test:integration {
+    npm run test:integration
+}
+
+function test:all {
+    npm run test:all
+}
+
+function check {
+    npm run format:check && npm run lint && npm run typecheck && npm test
+}
+
+function db:start {
+    docker compose up -d dynamodb-local
+}
+
+function db:stop {
+    docker compose down
+}
+
+function default {
+    echo "Usage: ./Taskfile <task>"
+    echo ""
+    echo "Tasks:"
+    echo "  setup            Initial setup (npm install, .env copy, tool check)"
+    echo "  dev              Start all services (DB + api + web)"
+    echo "  test:setup       Setup test environment"
+    echo "  test             Run unit tests"
+    echo "  test:integration Run integration tests"
+    echo "  test:all         Run all tests"
+    echo "  check            Run CI checks locally (format, lint, typecheck, test)"
+    echo "  db:start         Start DynamoDB Local"
+    echo "  db:stop          Stop DynamoDB Local"
+}
+
+"${@:-default}"
