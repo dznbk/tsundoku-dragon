@@ -18,14 +18,14 @@ vi.mock('../repositories/bookRepository', () => ({
   },
 }));
 
-const mockHasGlobalSkill = vi.fn();
-const mockHasUserCustomSkill = vi.fn();
+const mockFindGlobalSkills = vi.fn();
+const mockFindUserCustomSkills = vi.fn();
 const mockSaveUserCustomSkill = vi.fn();
 
 vi.mock('../repositories/skillRepository', () => ({
   SkillRepository: class {
-    hasGlobalSkill = mockHasGlobalSkill;
-    hasUserCustomSkill = mockHasUserCustomSkill;
+    findGlobalSkills = mockFindGlobalSkills;
+    findUserCustomSkills = mockFindUserCustomSkills;
     saveUserCustomSkill = mockSaveUserCustomSkill;
   },
 }));
@@ -47,6 +47,10 @@ describe('BookService', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+
+    // デフォルトのモック設定（スキルを持つテストがエラーにならないように）
+    mockFindGlobalSkills.mockResolvedValue([]);
+    mockFindUserCustomSkills.mockResolvedValue([]);
 
     service = new BookService(mockEnv);
   });
@@ -125,8 +129,8 @@ describe('BookService', () => {
 
     describe('カスタムスキル自動登録', () => {
       it('新規スキルをカスタムスキルとして登録する', async () => {
-        mockHasGlobalSkill.mockResolvedValue(false);
-        mockHasUserCustomSkill.mockResolvedValue(false);
+        mockFindGlobalSkills.mockResolvedValue([]);
+        mockFindUserCustomSkills.mockResolvedValue([]);
 
         await service.createBook('user-123', {
           title: 'テスト本',
@@ -134,11 +138,8 @@ describe('BookService', () => {
           skills: ['ニッチな技術'],
         });
 
-        expect(mockHasGlobalSkill).toHaveBeenCalledWith('ニッチな技術');
-        expect(mockHasUserCustomSkill).toHaveBeenCalledWith(
-          'user-123',
-          'ニッチな技術'
-        );
+        expect(mockFindGlobalSkills).toHaveBeenCalledOnce();
+        expect(mockFindUserCustomSkills).toHaveBeenCalledWith('user-123');
         expect(mockSaveUserCustomSkill).toHaveBeenCalledWith(
           'user-123',
           'ニッチな技術'
@@ -146,7 +147,10 @@ describe('BookService', () => {
       });
 
       it('グローバルスキルに存在する場合はカスタムスキルに登録しない', async () => {
-        mockHasGlobalSkill.mockResolvedValue(true);
+        mockFindGlobalSkills.mockResolvedValue([
+          { name: 'TypeScript', category: 'プログラミング言語' },
+        ]);
+        mockFindUserCustomSkills.mockResolvedValue([]);
 
         await service.createBook('user-123', {
           title: 'テスト本',
@@ -154,14 +158,16 @@ describe('BookService', () => {
           skills: ['TypeScript'],
         });
 
-        expect(mockHasGlobalSkill).toHaveBeenCalledWith('TypeScript');
-        expect(mockHasUserCustomSkill).not.toHaveBeenCalled();
+        expect(mockFindGlobalSkills).toHaveBeenCalledOnce();
+        expect(mockFindUserCustomSkills).toHaveBeenCalledWith('user-123');
         expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
       });
 
       it('カスタムスキルに既に存在する場合は重複登録しない', async () => {
-        mockHasGlobalSkill.mockResolvedValue(false);
-        mockHasUserCustomSkill.mockResolvedValue(true);
+        mockFindGlobalSkills.mockResolvedValue([]);
+        mockFindUserCustomSkills.mockResolvedValue([
+          { name: '既存のカスタムスキル', createdAt: '2024-01-01T00:00:00Z' },
+        ]);
 
         await service.createBook('user-123', {
           title: 'テスト本',
@@ -169,11 +175,8 @@ describe('BookService', () => {
           skills: ['既存のカスタムスキル'],
         });
 
-        expect(mockHasGlobalSkill).toHaveBeenCalledWith('既存のカスタムスキル');
-        expect(mockHasUserCustomSkill).toHaveBeenCalledWith(
-          'user-123',
-          '既存のカスタムスキル'
-        );
+        expect(mockFindGlobalSkills).toHaveBeenCalledOnce();
+        expect(mockFindUserCustomSkills).toHaveBeenCalledWith('user-123');
         expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
       });
 
@@ -184,7 +187,8 @@ describe('BookService', () => {
           skills: [],
         });
 
-        expect(mockHasGlobalSkill).not.toHaveBeenCalled();
+        expect(mockFindGlobalSkills).not.toHaveBeenCalled();
+        expect(mockFindUserCustomSkills).not.toHaveBeenCalled();
         expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
       });
 
@@ -194,7 +198,8 @@ describe('BookService', () => {
           totalPages: 100,
         });
 
-        expect(mockHasGlobalSkill).not.toHaveBeenCalled();
+        expect(mockFindGlobalSkills).not.toHaveBeenCalled();
+        expect(mockFindUserCustomSkills).not.toHaveBeenCalled();
         expect(mockSaveUserCustomSkill).not.toHaveBeenCalled();
       });
     });
