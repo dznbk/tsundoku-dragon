@@ -41,21 +41,27 @@ export class BookService {
     userId: string,
     skills: string[]
   ): Promise<void> {
-    for (const skillName of skills) {
-      // グローバルスキルに存在する場合はスキップ
-      const isGlobal = await this.skillRepository.hasGlobalSkill(skillName);
-      if (isGlobal) continue;
+    if (skills.length === 0) return;
 
-      // カスタムスキルに既に存在する場合はスキップ
-      const isCustom = await this.skillRepository.hasUserCustomSkill(
-        userId,
-        skillName
-      );
-      if (isCustom) continue;
+    // 2回のDB呼び出しで既存スキルを一括取得
+    const [globalSkills, customSkills] = await Promise.all([
+      this.skillRepository.findGlobalSkills(),
+      this.skillRepository.findUserCustomSkills(userId),
+    ]);
 
-      // 新規スキルをカスタムスキルとして登録
-      await this.skillRepository.saveUserCustomSkill(userId, skillName);
-    }
+    const existingNames = new Set([
+      ...globalSkills.map((s) => s.name),
+      ...customSkills.map((s) => s.name),
+    ]);
+
+    const newSkills = skills.filter((name) => !existingNames.has(name));
+
+    // 新規スキルを並列保存
+    await Promise.all(
+      newSkills.map((name) =>
+        this.skillRepository.saveUserCustomSkill(userId, name)
+      )
+    );
   }
 
   async listBooks(userId: string): Promise<Book[]> {
