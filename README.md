@@ -19,8 +19,8 @@ asdfを使っている場合は `.tool-versions` で自動的にバージョン�
 git clone https://github.com/your-username/tsundoku-dragon.git
 cd tsundoku-dragon
 
-# 依存関係のインストール
-npm install
+# 初期セットアップ（依存関係インストール + .env作成）
+./Taskfile setup
 ```
 
 ## 開発
@@ -43,7 +43,11 @@ http://localhost:8787 で起動します。
 
 ### 両方同時に起動
 
-ターミナルを2つ開いて、それぞれで `npm run dev:web` と `npm run dev:api` を実行してください。
+```bash
+./Taskfile dev
+```
+
+DynamoDB Local + API + Web を同時に起動します。Ctrl+C で全て停止します。
 
 ## その他のコマンド
 
