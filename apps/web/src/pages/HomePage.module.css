@@ -1,0 +1,51 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+}
+
+.statusSection {
+  /* ステータス表示セクション */
+}
+
+.booksSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.booksHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.booksTitle {
+  font-family: var(--font-pixel);
+  font-size: 1.125rem;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 32px;
+  font-family: var(--font-pixel);
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+}

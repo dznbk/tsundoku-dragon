@@ -1,0 +1,22 @@
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.reading {
+  background-color: var(--color-hp);
+  color: var(--color-bg-base);
+}
+
+.completed {
+  background-color: var(--color-success);
+  color: var(--color-bg-base);
+}
+
+.archived {
+  background-color: var(--color-text-muted);
+  color: var(--color-bg-base);
+}
