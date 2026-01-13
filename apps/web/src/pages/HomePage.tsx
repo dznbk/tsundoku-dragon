@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { DQWindow } from '../components/DQWindow';
 import { DQButton } from '../components/DQButton';
+import { BottomActionBar } from '../components/BottomActionBar';
 import { BookGrid } from '../features/books/components/BookGrid';
 import { CompletedToggle } from '../features/books/components/CompletedToggle';
 import { UserStatus } from '../features/books/components/UserStatus';
@@ -52,9 +53,9 @@ export function HomePage({ onNavigateToRegister }: HomePageProps) {
         )}
       </section>
 
-      <div className={styles.actions}>
+      <BottomActionBar>
         <DQButton onClick={onNavigateToRegister}>本を登録する</DQButton>
-      </div>
+      </BottomActionBar>
     </div>
   );
 }
