@@ -83,10 +83,13 @@
 - Googleログインブランディング（GoogleLoginButton、Googleロゴ）
 - continue-featureコマンド（フィードバック対応ワークフロー）
 - タイトル検索機能（TitleSearchInput、NDL API、useTitleSearch）
+- ホーム画面（本一覧）（BookGrid、BookCard、ProgressBar、UserStatus、CompletedToggle、BottomActionBar）
 
 ### 次にやること
 
-1. ホーム画面（本一覧）
+1. ステージング・本番環境の構築
+   - 計画: [planning/deployment-plan.md](../planning/deployment-plan.md)
+2. 本の詳細画面
 
 ### スキップ
 
@@ -148,6 +151,40 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-14 ステージング・本番環境の構築計画
+
+**議論した内容：**
+
+- 次にやることの優先順位（機能実装 vs インフラ整備）
+- デプロイ環境の構成（staging / production）
+- Webホスティング先（Cloudflare Pages）
+- CDトリガー（staging: main push自動、production: 手動/タグ）
+- カスタムドメイン設計（deepon.dev を使用）
+
+**決定事項：**
+
+| 決定                                                                   | 理由                                                          |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Cloudflare Pages (Direct Upload)                                       | APIがCloudflare Workersなので統一。GitHub Actionsから制御可能 |
+| staging: main push → 自動デプロイ                                      | 開発中の動作確認を迅速に                                      |
+| production: workflow_dispatch / タグ                                   | 本番リリースは明示的に制御                                    |
+| ドメイン: tsundoku.deepon.dev (prod), stg.tsundoku.deepon.dev (stg)    | 環境.サービス.ドメインの一般的パターン                        |
+| API: api.tsundoku.deepon.dev (prod), api-stg.tsundoku.deepon.dev (stg) | フロントと同じ命名規則                                        |
+
+**構成:**
+
+| レイヤー | staging                     | production              |
+| -------- | --------------------------- | ----------------------- |
+| Frontend | stg.tsundoku.deepon.dev     | tsundoku.deepon.dev     |
+| API      | api-stg.tsundoku.deepon.dev | api.tsundoku.deepon.dev |
+| DB       | tsundoku-dragon-staging     | tsundoku-dragon-prod    |
+
+**計画ファイル:**
+
+- [planning/deployment-plan.md](../planning/deployment-plan.md)
+
+---
 
 ### 2026-01-11 タイトル検索機能
 
