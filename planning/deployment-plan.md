@@ -24,100 +24,158 @@
 
 ## タスクリスト
 
-### Phase 1: AWSリソース作成（手動）
+---
 
-1. **DynamoDB テーブル作成**
-   - staging: `tsundoku-dragon-staging`
-   - production: `tsundoku-dragon-prod`
-   - リージョン: ap-northeast-1
-   - 課金モード: On-Demand（PAY_PER_REQUEST）
+### Staging 環境構築
 
-2. **IAM ユーザー作成**
-   - 用途: Cloudflare Workers からの DynamoDB アクセス
-   - ポリシー: DynamoDB への読み書き権限のみ
-   - 環境別に分けるか、同一ユーザーで両テーブルへのアクセスを許可
+#### Phase 1-S: AWS リソース作成（手動）
 
-### Phase 2: Cloudflare リソース作成
+- [ ] **DynamoDB テーブル作成**
+  - テーブル名: `tsundoku-dragon-staging`
+  - リージョン: ap-northeast-1
+  - PK: `PK` (文字列), SK: `SK` (文字列)
+  - キャパシティ: プロビジョンド 1 RCU / 1 WCU（Auto Scaling オフ）
+  - タグ: `Project=tsundoku-dragon`, `Environment=staging`
 
-3. **KV Namespace 作成**
+- [ ] **IAM ユーザー作成**
+  - ユーザー名: `tsundoku-dragon-worker`（staging/production 共用）
+  - 用途: Cloudflare Workers からの DynamoDB アクセス
+  - ポリシー: 両テーブルへの読み書き権限
 
-   ```bash
-   cd apps/api
-   # staging
-   wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --env staging
-   # production
-   wrangler kv:namespace create PUBLIC_JWK_CACHE_KV
-   ```
+#### Phase 2-S: Cloudflare リソース作成
 
-4. **wrangler.toml 環境別設定化**
-   - ファイル: [apps/api/wrangler.toml](apps/api/wrangler.toml)
-   - `[env.staging]` と `[env.production]` セクション追加
-   - 各環境の DynamoDB テーブル名、KV Namespace ID を設定
+- [ ] **KV Namespace 作成**
 
-5. **Cloudflare Secrets 設定**
-   ```bash
-   # staging
-   wrangler secret put AWS_ACCESS_KEY_ID --env staging
-   wrangler secret put AWS_SECRET_ACCESS_KEY --env staging
-   # production
-   wrangler secret put AWS_ACCESS_KEY_ID
-   wrangler secret put AWS_SECRET_ACCESS_KEY
-   ```
+  ```bash
+  cd apps/api
+  wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --env staging
+  ```
 
-### Phase 3: Cloudflare Pages 設定
+- [ ] **wrangler.toml 環境別設定化**
+  - ファイル: [apps/api/wrangler.toml](apps/api/wrangler.toml)
+  - `[env.staging]` セクション追加
+  - DynamoDB テーブル名: `tsundoku-dragon-staging`
+  - KV Namespace ID を設定
 
-6. **Cloudflare Pages プロジェクト作成**
-   - Cloudflare Dashboard から Direct Upload プロジェクトとして作成
-   - GitHub 連携は使わない（GitHub Actions から Direct Upload する）
-   - プロジェクト名: `tsundoku-dragon`
+- [ ] **Cloudflare Secrets 設定**
+  ```bash
+  wrangler secret put AWS_ACCESS_KEY_ID --env staging
+  wrangler secret put AWS_SECRET_ACCESS_KEY --env staging
+  ```
 
-7. **GitHub Actions 用の API トークン取得**
-   - Cloudflare Dashboard → My Profile → API Tokens
-   - 「Edit Cloudflare Workers」テンプレートをベースに作成
-   - Pages の編集権限を追加
-   - GitHub Secrets に `CLOUDFLARE_API_TOKEN` として登録
+#### Phase 3-S: Cloudflare Pages 設定
 
-### Phase 4: CD ワークフロー作成
+- [ ] **Cloudflare Pages プロジェクト作成**
+  - Cloudflare Dashboard から Direct Upload プロジェクトとして作成
+  - GitHub 連携は使わない（GitHub Actions から Direct Upload する）
+  - プロジェクト名: `tsundoku-dragon`
 
-8. **deploy.yml 作成**
-   - ファイル: `.github/workflows/deploy.yml`
-   - トリガー:
-     - `push` to main → staging 自動デプロイ
-     - `workflow_dispatch` → 環境選択パラメータで staging/production
-     - `push` tags `v*` → production 自動デプロイ（オプション）
-   - ジョブ:
-     - Web ビルド（npm run build）
-     - Web デプロイ（wrangler pages deploy apps/web/dist）
-     - API デプロイ（wrangler deploy）
-   - 環境変数の注入:
-     - staging: `VITE_API_URL=https://api-stg.tsundoku.deepon.dev`
-     - production: `VITE_API_URL=https://api.tsundoku.deepon.dev`
+- [ ] **GitHub Actions 用の API トークン取得**
+  - Cloudflare Dashboard → My Profile → API Tokens
+  - 「Edit Cloudflare Workers」テンプレートをベースに作成
+  - Pages の編集権限を追加
+  - GitHub Secrets に `CLOUDFLARE_API_TOKEN` として登録
 
-### Phase 5: カスタムドメイン設定
+#### Phase 4-S: CD ワークフロー作成
 
-9. **Cloudflare DNS 設定**
-   - deepon.dev のゾーンに以下の CNAME レコードを追加:
-     - `tsundoku` → `tsundoku-dragon.pages.dev`（本番 Web）
-     - `stg.tsundoku` → `tsundoku-dragon.pages.dev`（staging Web）
-     - `api.tsundoku` → `tsundoku-dragon.<account>.workers.dev`（本番 API）
-     - `api-stg.tsundoku` → `tsundoku-dragon-staging.<account>.workers.dev`（staging API）
+- [ ] **deploy.yml 作成（staging 用）**
+  - ファイル: `.github/workflows/deploy.yml`
+  - トリガー: `push` to main → staging 自動デプロイ
+  - ジョブ:
+    - Web ビルド（npm run build）
+    - Web デプロイ（wrangler pages deploy apps/web/dist）
+    - API デプロイ（wrangler deploy --env staging）
+  - 環境変数: `VITE_API_URL=https://api-stg.tsundoku.deepon.dev`
 
-10. **Workers カスタムドメイン設定**
-    - wrangler.toml の routes または Cloudflare Dashboard から設定
+#### Phase 5-S: カスタムドメイン設定
 
-11. **Pages カスタムドメイン設定**
-    - Cloudflare Dashboard → Pages → tsundoku-dragon → Custom domains
-    - 本番: tsundoku.deepon.dev
-    - staging: stg.tsundoku.deepon.dev
+- [ ] **Cloudflare DNS 設定（staging）**
+  - `stg.tsundoku` → `tsundoku-dragon.pages.dev`（staging Web）
+  - `api-stg.tsundoku` → Workers カスタムドメイン
 
-### Phase 6: ドキュメント更新
+- [ ] **Workers カスタムドメイン設定**
+  - wrangler.toml の routes または Cloudflare Dashboard から設定
 
-12. **CONTEXT.md 更新**
-    - 「次にやること」をステージング環境構築に変更
-    - 完了後は「本の詳細画面」に更新
+- [ ] **Pages カスタムドメイン設定**
+  - Cloudflare Dashboard → Pages → tsundoku-dragon → Custom domains
+  - staging: stg.tsundoku.deepon.dev
 
-13. **CLAUDE.md 更新（必要に応じて）**
-    - デプロイ手順の詳細化
+#### Phase 6-S: 検証
+
+- [ ] **staging 環境デプロイ & 動作確認**
+  - API: `https://api-stg.tsundoku.deepon.dev/health`
+  - Web: `https://stg.tsundoku.deepon.dev`
+  - E2E: ログイン、本の登録、本一覧表示
+
+---
+
+### Production 環境構築
+
+#### Phase 1-P: AWS リソース作成（手動）
+
+- [ ] **DynamoDB テーブル作成**
+  - テーブル名: `tsundoku-dragon-prod`
+  - リージョン: ap-northeast-1
+  - PK: `PK` (文字列), SK: `SK` (文字列)
+  - キャパシティ: プロビジョンド 5 RCU / 5 WCU（Auto Scaling オフ）
+  - タグ: `Project=tsundoku-dragon`, `Environment=production`
+  - 削除保護: オン
+
+#### Phase 2-P: Cloudflare リソース作成
+
+- [ ] **KV Namespace 作成**
+
+  ```bash
+  cd apps/api
+  wrangler kv:namespace create PUBLIC_JWK_CACHE_KV
+  ```
+
+- [ ] **wrangler.toml 環境別設定化**
+  - `[env.production]` セクション追加
+  - DynamoDB テーブル名: `tsundoku-dragon-prod`
+  - KV Namespace ID を設定
+
+- [ ] **Cloudflare Secrets 設定**
+  ```bash
+  wrangler secret put AWS_ACCESS_KEY_ID
+  wrangler secret put AWS_SECRET_ACCESS_KEY
+  ```
+
+#### Phase 4-P: CD ワークフロー更新
+
+- [ ] **deploy.yml 更新（production 用）**
+  - トリガー追加:
+    - `workflow_dispatch` → 環境選択パラメータで staging/production
+    - `push` tags `v*` → production 自動デプロイ（オプション）
+  - 環境変数: `VITE_API_URL=https://api.tsundoku.deepon.dev`
+
+#### Phase 5-P: カスタムドメイン設定
+
+- [ ] **Cloudflare DNS 設定（production）**
+  - `tsundoku` → `tsundoku-dragon.pages.dev`（本番 Web）
+  - `api.tsundoku` → Workers カスタムドメイン
+
+- [ ] **Workers カスタムドメイン設定**
+
+- [ ] **Pages カスタムドメイン設定**
+  - 本番: tsundoku.deepon.dev
+
+#### Phase 6-P: 検証
+
+- [ ] **production 環境デプロイ & 動作確認**
+  - API: `https://api.tsundoku.deepon.dev/health`
+  - Web: `https://tsundoku.deepon.dev`
+  - E2E: ログイン、本の登録、本一覧表示
+
+---
+
+### 完了後
+
+- [ ] **CONTEXT.md 更新**
+  - 「次にやること」を「本の詳細画面」に更新
+
+- [ ] **CLAUDE.md 更新（必要に応じて）**
+  - デプロイ手順の詳細化
 
 ---
 
