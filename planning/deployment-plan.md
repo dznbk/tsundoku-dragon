@@ -13,12 +13,14 @@
 
 ## 構成
 
-| レイヤー | 技術                             | staging                             | production              |
-| -------- | -------------------------------- | ----------------------------------- | ----------------------- |
-| Frontend | Cloudflare Pages (Direct Upload) | stg.tsundoku.deepon.dev             | tsundoku.deepon.dev     |
-| API      | Cloudflare Workers               | api-stg.tsundoku.deepon.dev         | api.tsundoku.deepon.dev |
-| DB       | DynamoDB                         | tsundoku-dragon-staging             | tsundoku-dragon-prod    |
-| Auth     | Firebase                         | 同一プロジェクト（tsundoku-dragon） | 同一                    |
+| レイヤー | 技術               | staging                             | production              |
+| -------- | ------------------ | ----------------------------------- | ----------------------- |
+| Frontend | Cloudflare Workers | stg.tsundoku.deepon.dev             | tsundoku.deepon.dev     |
+| API      | Cloudflare Workers | api-stg.tsundoku.deepon.dev         | api.tsundoku.deepon.dev |
+| DB       | DynamoDB           | tsundoku-dragon-staging             | tsundoku-dragon-prod    |
+| Auth     | Firebase           | 同一プロジェクト（tsundoku-dragon） | 同一                    |
+
+> **備考**: Cloudflare は Pages と Workers を統合中であり、静的アセットも Workers でホスティング可能。本プロジェクトでは Workers を使用。
 
 ---
 
@@ -26,86 +28,90 @@
 
 ---
 
-### Staging 環境構築
+### Staging 環境構築 ✅ 完了
 
-#### Phase 1-S: AWS リソース作成（手動）
+#### Phase 1-S: AWS リソース作成（手動） ✅
 
-- [ ] **DynamoDB テーブル作成**
+- [x] **DynamoDB テーブル作成**
   - テーブル名: `tsundoku-dragon-staging`
   - リージョン: ap-northeast-1
   - PK: `PK` (文字列), SK: `SK` (文字列)
   - キャパシティ: プロビジョンド 1 RCU / 1 WCU（Auto Scaling オフ）
   - タグ: `Project=tsundoku-dragon`, `Environment=staging`
 
-- [ ] **IAM ユーザー作成**
+- [x] **IAM ユーザー作成**
   - ユーザー名: `tsundoku-dragon-worker`（staging/production 共用）
   - 用途: Cloudflare Workers からの DynamoDB アクセス
   - ポリシー: 両テーブルへの読み書き権限
 
-#### Phase 2-S: Cloudflare リソース作成
+#### Phase 2-S: Cloudflare リソース作成 ✅
 
-- [ ] **KV Namespace 作成**
+- [x] **KV Namespace 作成**
+  - ID: `486c84b66f0842e798c973b5ea081976`
 
-  ```bash
-  cd apps/api
-  wrangler kv:namespace create PUBLIC_JWK_CACHE_KV --env staging
-  ```
-
-- [ ] **wrangler.toml 環境別設定化**
+- [x] **wrangler.toml 環境別設定化**
   - ファイル: [apps/api/wrangler.toml](apps/api/wrangler.toml)
   - `[env.staging]` セクション追加
   - DynamoDB テーブル名: `tsundoku-dragon-staging`
   - KV Namespace ID を設定
+  - `ALLOWED_ORIGINS` で CORS を環境ごとに分離
 
-- [ ] **Cloudflare Secrets 設定**
+- [x] **Cloudflare Secrets 設定**
   ```bash
   wrangler secret put AWS_ACCESS_KEY_ID --env staging
   wrangler secret put AWS_SECRET_ACCESS_KEY --env staging
   ```
 
-#### Phase 3-S: Cloudflare Pages 設定
+#### Phase 3-S: Cloudflare Workers 設定 ✅
 
-- [ ] **Cloudflare Pages プロジェクト作成**
-  - Cloudflare Dashboard から Direct Upload プロジェクトとして作成
-  - GitHub 連携は使わない（GitHub Actions から Direct Upload する）
-  - プロジェクト名: `tsundoku-dragon`
+- [x] **Cloudflare Workers プロジェクト作成**
+  - Web: `tsundoku-dragon-staging`（静的アセットホスティング）
+  - API: `tsundoku-dragon-api-staging`
+  - GitHub Actions からデプロイ
 
-- [ ] **GitHub Actions 用の API トークン取得**
-  - Cloudflare Dashboard → My Profile → API Tokens
-  - 「Edit Cloudflare Workers」テンプレートをベースに作成
-  - Pages の編集権限を追加
-  - GitHub Secrets に `CLOUDFLARE_API_TOKEN` として登録
+- [x] **GitHub Actions 用の API トークン取得**
+  - GitHub Secrets に登録:
+    - `CLOUDFLARE_API_TOKEN`
+    - `CLOUDFLARE_ACCOUNT_ID`
 
-#### Phase 4-S: CD ワークフロー作成
+#### Phase 4-S: CD ワークフロー作成 ✅
 
-- [ ] **deploy.yml 作成（staging 用）**
-  - ファイル: `.github/workflows/deploy.yml`
+- [x] **deploy.yml 作成（staging 用）**
+  - ファイル: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
   - トリガー: `push` to main → staging 自動デプロイ
   - ジョブ:
     - Web ビルド（npm run build）
-    - Web デプロイ（wrangler pages deploy apps/web/dist）
+    - Web デプロイ（wrangler deploy --env staging）
     - API デプロイ（wrangler deploy --env staging）
   - 環境変数: `VITE_API_URL=https://api-stg.tsundoku.deepon.dev`
+  - Firebase 環境変数もビルド時に注入
 
-#### Phase 5-S: カスタムドメイン設定
+#### Phase 5-S: カスタムドメイン設定 ✅
 
-- [ ] **Cloudflare DNS 設定（staging）**
-  - `stg.tsundoku` → `tsundoku-dragon.pages.dev`（staging Web）
-  - `api-stg.tsundoku` → Workers カスタムドメイン
+- [x] **Cloudflare DNS 設定（staging）**
+  - `stg.tsundoku.deepon.dev` → `tsundoku-dragon-staging` Workers
+  - `api-stg.tsundoku.deepon.dev` → `tsundoku-dragon-api-staging` Workers
 
-- [ ] **Workers カスタムドメイン設定**
-  - wrangler.toml の routes または Cloudflare Dashboard から設定
+- [x] **Workers カスタムドメイン設定**
+  - Cloudflare Dashboard から設定
 
-- [ ] **Pages カスタムドメイン設定**
-  - Cloudflare Dashboard → Pages → tsundoku-dragon → Custom domains
-  - staging: stg.tsundoku.deepon.dev
+- [x] **Firebase 承認済みドメイン追加**
+  - `stg.tsundoku.deepon.dev` を Firebase Console で追加
 
-#### Phase 6-S: 検証
+#### Phase 6-S: 検証 ✅
 
-- [ ] **staging 環境デプロイ & 動作確認**
-  - API: `https://api-stg.tsundoku.deepon.dev/health`
-  - Web: `https://stg.tsundoku.deepon.dev`
-  - E2E: ログイン、本の登録、本一覧表示
+- [x] **staging 環境デプロイ & 動作確認**
+  - API: `https://api-stg.tsundoku.deepon.dev/health` ✅
+  - Web: `https://stg.tsundoku.deepon.dev` ✅
+  - E2E: ログイン、本の登録、本一覧表示 ✅
+
+#### 追加: アクセス制限 ✅
+
+- [x] **Cloudflare Access 設定**
+  - Application: `tsundoku-dragon-staging`
+  - 対象ホスト: `stg.tsundoku.deepon.dev`（Web のみ、API は除外）
+  - 認証方式: One-time PIN（メール認証）
+  - ポリシー: 指定メールアドレスのみ許可
 
 ---
 

@@ -84,10 +84,11 @@
 - continue-featureコマンド（フィードバック対応ワークフロー）
 - タイトル検索機能（TitleSearchInput、NDL API、useTitleSearch）
 - ホーム画面（本一覧）（BookGrid、BookCard、ProgressBar、UserStatus、CompletedToggle、BottomActionBar）
+- ステージング環境構築（Cloudflare Workers、GitHub Actions CD、カスタムドメイン、Cloudflare Access）
 
 ### 次にやること
 
-1. ステージング・本番環境の構築
+1. 本番環境の構築
    - 計画: [planning/deployment-plan.md](../planning/deployment-plan.md)
 2. 本の詳細画面
 
@@ -151,6 +152,46 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-18 ステージング環境構築完了
+
+**実施した内容：**
+
+- Cloudflare Workers へのデプロイ設定（Web + API）
+- GitHub Actions による CI/CD パイプライン構築
+- カスタムドメイン設定（stg.tsundoku.deepon.dev、api-stg.tsundoku.deepon.dev）
+- CORS の環境別設定（`ALLOWED_ORIGINS` 環境変数）
+- Cloudflare Access によるステージング環境のアクセス制限
+
+**作成・修正したファイル：**
+
+| ファイル                       | 内容                             |
+| ------------------------------ | -------------------------------- |
+| `.github/workflows/deploy.yml` | staging 自動デプロイワークフロー |
+| `apps/web/wrangler.toml`       | Web Workers 設定                 |
+| `apps/api/wrangler.toml`       | staging 環境設定追加             |
+| `apps/api/src/index.ts`        | CORS を環境変数で制御            |
+| `apps/api/src/types/env.ts`    | ALLOWED_ORIGINS 型追加           |
+| `apps/api/src/index.test.ts`   | mockEnv 追加                     |
+| `planning/deployment-plan.md`  | 進捗更新                         |
+
+**技術的な決定：**
+
+| 決定                                     | 理由                                                        |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| Cloudflare Pages ではなく Workers を使用 | Cloudflare が両者を統合中、Workers で静的アセットも可能     |
+| CORS を環境変数で制御                    | localhost/staging/production の設定を分離、セキュリティ向上 |
+| Cloudflare Access で Web のみ保護        | API を保護すると fetch リクエストがブロックされる           |
+| One-time PIN 認証                        | シンプルで追加設定不要                                      |
+
+**学び：**
+
+- Cloudflare Workers の `[assets]` ディレクティブで静的アセットをホスティング可能
+- Vite 環境変数（`VITE_*`）はビルド時に注入が必要
+- Firebase 承認済みドメインにステージングドメインを追加する必要がある
+- Cloudflare Access は Web フロントのみに適用し、API は除外すべき
+
+---
 
 ### 2026-01-14 ステージング・本番環境の構築計画
 
