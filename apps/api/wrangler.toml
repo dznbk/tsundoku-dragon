@@ -26,6 +26,7 @@ AWS_REGION = "ap-northeast-1"
 FIREBASE_PROJECT_ID = "tsundoku-dragon"
 PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
 DYNAMODB_TABLE_NAME = "tsundoku-dragon-staging"
+ALLOWED_ORIGINS = "https://stg.tsundoku.deepon.dev"
 
 [[env.staging.kv_namespaces]]
 binding = "PUBLIC_JWK_CACHE_KV"
@@ -39,6 +40,7 @@ id = "486c84b66f0842e798c973b5ea081976"
 #
 # [env.production.vars]
 # DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
+# ALLOWED_ORIGINS = "https://tsundoku.deepon.dev"
 #
 # [[env.production.kv_namespaces]]
 # binding = "PUBLIC_JWK_CACHE_KV"

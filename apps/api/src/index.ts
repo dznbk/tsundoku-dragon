@@ -10,14 +10,18 @@ import skills from './routes/skills';
 const app = new Hono<{ Bindings: Env }>();
 
 // CORS設定（OPTIONSプリフライトリクエストを許可）
-app.use(
-  '*',
-  cors({
-    origin: ['http://localhost:5173', 'http://localhost:4173'],
+// 許可するoriginは環境変数で制御（カンマ区切り）
+app.use('*', async (c, next) => {
+  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') ?? [
+    'http://localhost:5173',
+  ];
+  const corsMiddleware = cors({
+    origin: allowedOrigins,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+  });
+  return corsMiddleware(c, next);
+});
 
 // 認証が必要なルートにミドルウェアを適用
 app.use('/books', authMiddleware);
