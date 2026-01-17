@@ -5,18 +5,41 @@ compatibility_date = "2025-12-23"
 [dev]
 port = 8787
 
-# 本番環境変数（シークレット以外）
+# 共通環境変数
 [vars]
 AWS_REGION = "ap-northeast-1"
-DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
 FIREBASE_PROJECT_ID = "tsundoku-dragon"
 PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
 
-# KV namespace for Firebase Auth public key cache
-[[kv_namespaces]]
-binding = "PUBLIC_JWK_CACHE_KV"
-id = "REPLACE_ME_WITH_ACTUAL_KV_ID"  # wrangler kv:namespace create PUBLIC_JWK_CACHE_KV で取得
-
 # シークレットは wrangler secret put で設定:
-# wrangler secret put AWS_ACCESS_KEY_ID
-# wrangler secret put AWS_SECRET_ACCESS_KEY
+# wrangler secret put AWS_ACCESS_KEY_ID --env staging
+# wrangler secret put AWS_SECRET_ACCESS_KEY --env staging
+
+# ============================================================
+# Staging 環境
+# ============================================================
+[env.staging]
+name = "tsundoku-dragon-api-staging"
+
+[env.staging.vars]
+AWS_REGION = "ap-northeast-1"
+FIREBASE_PROJECT_ID = "tsundoku-dragon"
+PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
+DYNAMODB_TABLE_NAME = "tsundoku-dragon-staging"
+
+[[env.staging.kv_namespaces]]
+binding = "PUBLIC_JWK_CACHE_KV"
+id = "486c84b66f0842e798c973b5ea081976"
+
+# ============================================================
+# Production 環境（後で設定）
+# ============================================================
+# [env.production]
+# name = "tsundoku-dragon-api"
+#
+# [env.production.vars]
+# DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
+#
+# [[env.production.kv_namespaces]]
+# binding = "PUBLIC_JWK_CACHE_KV"
+# id = "REPLACE_ME_WITH_PRODUCTION_KV_ID"
