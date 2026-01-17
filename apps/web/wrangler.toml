@@ -1,0 +1,17 @@
+name = "tsundoku-dragon"
+main = ".workers/index.js"
+compatibility_date = "2025-12-23"
+
+assets = { directory = "./dist" }
+
+# ============================================================
+# Staging 環境
+# ============================================================
+[env.staging]
+name = "tsundoku-dragon-staging"
+
+# ============================================================
+# Production 環境（後で設定）
+# ============================================================
+# [env.production]
+# name = "tsundoku-dragon"

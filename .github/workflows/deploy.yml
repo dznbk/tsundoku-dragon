@@ -32,12 +32,13 @@ jobs:
         env:
           VITE_API_URL: https://api-stg.tsundoku.deepon.dev
 
-      - name: Deploy Web to Cloudflare Pages
+      - name: Deploy Web to Cloudflare Workers
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=tsundoku-dragon --branch=staging
+          workingDirectory: apps/web
+          command: deploy --env staging
 
       - name: Deploy API to Cloudflare Workers
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
