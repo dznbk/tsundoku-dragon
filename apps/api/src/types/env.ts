@@ -13,4 +13,6 @@ export type Env = {
   PUBLIC_JWK_CACHE_KEY: string;
   PUBLIC_JWK_CACHE_KV: KVNamespace;
   FIREBASE_AUTH_EMULATOR_HOST?: string;
+  // CORS
+  ALLOWED_ORIGINS?: string;
 };
