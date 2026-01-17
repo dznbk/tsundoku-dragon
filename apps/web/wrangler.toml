@@ -1,8 +1,8 @@
 name = "tsundoku-dragon"
-main = ".workers/index.js"
 compatibility_date = "2025-12-23"
 
-assets = { directory = "./dist" }
+[assets]
+directory = "./dist"
 
 # ============================================================
 # Staging 環境
