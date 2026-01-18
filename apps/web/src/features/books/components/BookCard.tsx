@@ -5,6 +5,7 @@ import styles from './BookCard.module.css';
 
 interface BookCardProps {
   book: Book;
+  onClick?: () => void;
 }
 
 function getCoverUrl(isbn?: string): string {
@@ -14,11 +15,30 @@ function getCoverUrl(isbn?: string): string {
   return `https://ndlsearch.ndl.go.jp/thumbnail/${isbn}.jpg`;
 }
 
-export function BookCard({ book }: BookCardProps) {
+export function BookCard({ book, onClick }: BookCardProps) {
   const coverUrl = getCoverUrl(book.isbn);
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <article className={styles.card}>
+    <article
+      className={`${styles.card} ${onClick ? styles.clickable : ''}`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className={styles.coverContainer}>
         <img
           src={coverUrl}

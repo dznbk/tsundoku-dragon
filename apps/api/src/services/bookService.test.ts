@@ -9,12 +9,16 @@ vi.mock('nanoid', () => ({
 const mockSave = vi.fn();
 const mockFindByUserId = vi.fn();
 const mockFindById = vi.fn();
+const mockUpdate = vi.fn();
+const mockFindLogs = vi.fn();
 
 vi.mock('../repositories/bookRepository', () => ({
   BookRepository: class {
     save = mockSave;
     findByUserId = mockFindByUserId;
     findById = mockFindById;
+    update = mockUpdate;
+    findLogs = mockFindLogs;
   },
 }));
 
@@ -258,6 +262,238 @@ describe('BookService', () => {
       const result = await service.getBook('user-123', 'not-exist');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('updateBook', () => {
+    const mockBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 50,
+      status: 'reading',
+      skills: ['TypeScript'],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('本を更新する', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      const updatedBook = { ...mockBook, title: '更新後タイトル' };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const result = await service.updateBook('user-123', 'book-123', {
+        title: '更新後タイトル',
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        title: '更新後タイトル',
+        totalPages: undefined,
+        skills: undefined,
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.title).toBe('更新後タイトル');
+    });
+
+    it('存在しない本はnullを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.updateBook('user-123', 'not-exist', {
+        title: '更新後',
+      });
+
+      expect(result).toBeNull();
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('アーカイブ済みの本は更新できない', async () => {
+      mockFindById.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
+
+      await expect(
+        service.updateBook('user-123', 'book-123', { title: '更新後' })
+      ).rejects.toThrow('Cannot update archived book');
+    });
+
+    it('新規スキルをカスタムスキルに登録する', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockUpdate.mockResolvedValueOnce({ ...mockBook, skills: ['新スキル'] });
+      mockFindGlobalSkills.mockResolvedValue([]);
+      mockFindUserCustomSkills.mockResolvedValue([]);
+
+      await service.updateBook('user-123', 'book-123', {
+        skills: ['新スキル'],
+      });
+
+      expect(mockSaveUserCustomSkill).toHaveBeenCalledWith(
+        'user-123',
+        '新スキル'
+      );
+    });
+  });
+
+  describe('archiveBook', () => {
+    const mockBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 0,
+      status: 'reading',
+      skills: [],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('本をアーカイブする', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockUpdate.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
+
+      const result = await service.archiveBook('user-123', 'book-123');
+
+      expect(result).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        status: 'archived',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('存在しない本はfalseを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.archiveBook('user-123', 'not-exist');
+
+      expect(result).toBe(false);
+    });
+
+    it('既にアーカイブ済みの本はエラー', async () => {
+      mockFindById.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
+
+      await expect(service.archiveBook('user-123', 'book-123')).rejects.toThrow(
+        'Book is already archived'
+      );
+    });
+  });
+
+  describe('resetBook', () => {
+    const mockCompletedBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 100,
+      status: 'completed',
+      skills: [],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('討伐済みの本をリセットする', async () => {
+      mockFindById.mockResolvedValueOnce(mockCompletedBook);
+      const resetBook = {
+        ...mockCompletedBook,
+        currentPage: 0,
+        round: 2,
+        status: 'reading',
+      };
+      mockUpdate.mockResolvedValueOnce(resetBook);
+
+      const result = await service.resetBook('user-123', 'book-123');
+
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 0,
+        round: 2,
+        status: 'reading',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.round).toBe(2);
+      expect(result?.currentPage).toBe(0);
+    });
+
+    it('存在しない本はnullを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.resetBook('user-123', 'not-exist');
+
+      expect(result).toBeNull();
+    });
+
+    it('戦闘中の本はリセットできない', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockCompletedBook,
+        status: 'reading',
+      });
+
+      await expect(service.resetBook('user-123', 'book-123')).rejects.toThrow(
+        'Can only reset completed books'
+      );
+    });
+  });
+
+  describe('getBookLogs', () => {
+    const mockBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 0,
+      status: 'reading',
+      skills: [],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('本のログを取得する', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      const mockLogs = {
+        logs: [
+          {
+            id: 'log-1',
+            bookId: 'book-123',
+            pagesRead: 30,
+            createdAt: '2024-01-01T12:00:00Z',
+          },
+        ],
+        nextCursor: undefined,
+      };
+      mockFindLogs.mockResolvedValueOnce(mockLogs);
+
+      const result = await service.getBookLogs('user-123', 'book-123');
+
+      expect(mockFindLogs).toHaveBeenCalledWith(
+        'user-123',
+        'book-123',
+        undefined
+      );
+      expect(result?.logs).toHaveLength(1);
+    });
+
+    it('存在しない本はnullを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.getBookLogs('user-123', 'not-exist');
+
+      expect(result).toBeNull();
+      expect(mockFindLogs).not.toHaveBeenCalled();
+    });
+
+    it('オプションを渡せる', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockFindLogs.mockResolvedValueOnce({ logs: [], nextCursor: undefined });
+
+      await service.getBookLogs('user-123', 'book-123', {
+        limit: 10,
+        cursor: 'abc',
+      });
+
+      expect(mockFindLogs).toHaveBeenCalledWith('user-123', 'book-123', {
+        limit: 10,
+        cursor: 'abc',
+      });
     });
   });
 });

@@ -1,0 +1,75 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.backButton:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.main {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.infoSection {
+  padding: 16px;
+}
+
+.logsSection {
+  padding: 16px;
+}
+
+.deleteConfirm {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: 4px;
+}
+
+.deleteConfirm p {
+  margin: 0 0 8px 0;
+  color: var(--color-error);
+  font-size: 0.875rem;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

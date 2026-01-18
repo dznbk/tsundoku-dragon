@@ -1,8 +1,11 @@
 import { nanoid } from 'nanoid';
 import type { Book } from '@tsundoku-dragon/shared';
-import { BookRepository } from '../repositories/bookRepository';
+import {
+  BookRepository,
+  type LogsQueryResult,
+} from '../repositories/bookRepository';
 import { SkillRepository } from '../repositories/skillRepository';
-import type { CreateBookInput } from '../types/api';
+import type { CreateBookInput, UpdateBookInput } from '../types/api';
 import type { Env } from '../lib/dynamodb';
 
 export class BookService {
@@ -70,5 +73,86 @@ export class BookService {
 
   async getBook(userId: string, bookId: string): Promise<Book | null> {
     return this.repository.findById(userId, bookId);
+  }
+
+  async updateBook(
+    userId: string,
+    bookId: string,
+    input: UpdateBookInput
+  ): Promise<Book | null> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      return null;
+    }
+
+    if (book.status === 'archived') {
+      throw new Error('Cannot update archived book');
+    }
+
+    const now = new Date().toISOString();
+    const updatedBook = await this.repository.update(userId, bookId, {
+      title: input.title,
+      totalPages: input.totalPages,
+      skills: input.skills,
+      updatedAt: now,
+    });
+
+    // 新規スキルをカスタムスキルに自動登録
+    if (input.skills) {
+      await this.registerNewSkillsAsCustomSkills(userId, input.skills);
+    }
+
+    return updatedBook;
+  }
+
+  async archiveBook(userId: string, bookId: string): Promise<boolean> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      return false;
+    }
+
+    if (book.status === 'archived') {
+      throw new Error('Book is already archived');
+    }
+
+    const now = new Date().toISOString();
+    await this.repository.update(userId, bookId, {
+      status: 'archived',
+      updatedAt: now,
+    });
+
+    return true;
+  }
+
+  async resetBook(userId: string, bookId: string): Promise<Book | null> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      return null;
+    }
+
+    if (book.status !== 'completed') {
+      throw new Error('Can only reset completed books');
+    }
+
+    const now = new Date().toISOString();
+    return this.repository.update(userId, bookId, {
+      currentPage: 0,
+      round: book.round + 1,
+      status: 'reading',
+      updatedAt: now,
+    });
+  }
+
+  async getBookLogs(
+    userId: string,
+    bookId: string,
+    options?: { limit?: number; cursor?: string }
+  ): Promise<LogsQueryResult | null> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      return null;
+    }
+
+    return this.repository.findLogs(userId, bookId, options);
   }
 }

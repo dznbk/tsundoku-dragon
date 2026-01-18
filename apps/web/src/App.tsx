@@ -5,13 +5,15 @@ import { DQWindow } from './components/DQWindow';
 import LoginPage from './pages/LoginPage';
 import { BookRegisterPage } from './pages/BookRegisterPage';
 import { HomePage } from './pages/HomePage';
+import { BookDetailPage } from './pages/BookDetailPage';
 import styles from './App.module.css';
 
-type Page = 'home' | 'book-register';
+type Page = 'home' | 'book-register' | 'book-detail';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
 
   if (loading) {
     return <div className={styles.loading}>読み込み中...</div>;
@@ -32,6 +34,27 @@ function AppContent() {
   if (currentPage === 'book-register') {
     return <BookRegisterPage onBack={() => setCurrentPage('home')} />;
   }
+
+  if (currentPage === 'book-detail' && selectedBookId) {
+    return (
+      <BookDetailPage
+        bookId={selectedBookId}
+        onBack={() => {
+          setCurrentPage('home');
+          setSelectedBookId(null);
+        }}
+        onNavigateToBattle={(bookId) => {
+          // TODO: 戦闘画面への遷移（別Issue）
+          console.log('Navigate to battle:', bookId);
+        }}
+      />
+    );
+  }
+
+  const handleBookClick = (bookId: string) => {
+    setSelectedBookId(bookId);
+    setCurrentPage('book-detail');
+  };
 
   return (
     <div className={styles.app}>
@@ -59,6 +82,7 @@ function AppContent() {
       <main className={styles.main}>
         <HomePage
           onNavigateToRegister={() => setCurrentPage('book-register')}
+          onBookClick={handleBookClick}
         />
       </main>
     </div>

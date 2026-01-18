@@ -4,9 +4,10 @@ import styles from './BookGrid.module.css';
 
 interface BookGridProps {
   books: Book[];
+  onBookClick?: (bookId: string) => void;
 }
 
-export function BookGrid({ books }: BookGridProps) {
+export function BookGrid({ books, onBookClick }: BookGridProps) {
   if (books.length === 0) {
     return (
       <div className={styles.empty}>
@@ -19,7 +20,11 @@ export function BookGrid({ books }: BookGridProps) {
   return (
     <div className={styles.grid}>
       {books.map((book) => (
-        <BookCard key={book.id} book={book} />
+        <BookCard
+          key={book.id}
+          book={book}
+          onClick={onBookClick ? () => onBookClick(book.id) : undefined}
+        />
       ))}
     </div>
   );
