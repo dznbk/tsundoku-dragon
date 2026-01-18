@@ -8,3 +8,6 @@ export { BookCard } from './BookCard';
 export { BookGrid } from './BookGrid';
 export { CompletedToggle } from './CompletedToggle';
 export { UserStatus } from './UserStatus';
+export { BookInfo } from './BookInfo';
+export { BattleLogList } from './BattleLogList';
+export { BookEditModal } from './BookEditModal';
