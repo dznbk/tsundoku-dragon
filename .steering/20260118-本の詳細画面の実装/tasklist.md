@@ -28,48 +28,48 @@
 ## 進捗
 
 - 開始: 2026-01-18
-- 完了: （未完了）
+- 完了: 2026-01-18
 
 ---
 
 ## フェーズ1: バックエンド基盤
 
-- [ ] shared packageにBattleLog型を追加
-- [ ] BookRepository: update, softDeleteメソッド追加
-- [ ] BattleLogRepository: 新規作成（findByBookId with pagination）
-- [ ] BookService: updateBook, deleteBook, resetBookメソッド追加
-- [ ] api/types/api.ts: updateBookSchema追加
+- [x] shared packageにBattleLog型を追加
+- [x] BookRepository: update, softDeleteメソッド追加
+- [x] BattleLogRepository: 新規作成（findByBookId with pagination）
+- [x] BookService: updateBook, deleteBook, resetBookメソッド追加
+- [x] api/types/api.ts: updateBookSchema追加
 
 ## フェーズ2: バックエンドAPI
 
-- [ ] PUT /books/:id エンドポイント実装
-- [ ] DELETE /books/:id エンドポイント実装
-- [ ] POST /books/:id/reset エンドポイント実装
-- [ ] GET /books/:id/logs エンドポイント実装
-- [ ] 各エンドポイントのユニットテスト
+- [x] PUT /books/:id エンドポイント実装
+- [x] DELETE /books/:id エンドポイント実装
+- [x] POST /books/:id/reset エンドポイント実装
+- [x] GET /books/:id/logs エンドポイント実装
+- [x] 各エンドポイントのユニットテスト
 
 ## フェーズ3: フロントエンド基盤
 
-- [ ] bookApi.ts: getBook, updateBook, deleteBook, resetBook, getBattleLogs関数追加
-- [ ] useBookDetail フック作成
-- [ ] useBattleLogs フック作成（ページネーション対応）
+- [x] bookApi.ts: getBook, updateBook, deleteBook, resetBook, getBattleLogs関数追加
+- [x] useBookDetail フック作成
+- [x] useBattleLogs フック作成（ページネーション対応）
 
 ## フェーズ4: フロントエンドUI
 
-- [ ] Pagination コンポーネント作成
-- [ ] BookInfo コンポーネント作成
-- [ ] BattleLogList コンポーネント作成
-- [ ] BookEditModal コンポーネント作成
-- [ ] BookDetailPage 作成
-- [ ] BookCard をクリック可能に変更
-- [ ] App.tsx にページ遷移ロジック追加
+- [x] Pagination コンポーネント作成
+- [x] BookInfo コンポーネント作成
+- [x] BattleLogList コンポーネント作成
+- [x] BookEditModal コンポーネント作成
+- [x] BookDetailPage 作成
+- [x] BookCard をクリック可能に変更
+- [x] App.tsx にページ遷移ロジック追加
 
 ## フェーズ5: 品質チェック
 
-- [ ] テストが通ることを確認 (`npm run test:all`)
-- [ ] リントエラーがないことを確認 (`npm run lint`)
-- [ ] 型エラーがないことを確認 (`npm run typecheck`)
-- [ ] フォーマットエラーがないことを確認 (`npm run format:check`)
+- [x] テストが通ることを確認 (`npm run test:all`)
+- [x] リントエラーがないことを確認 (`npm run lint`)
+- [x] 型エラーがないことを確認 (`npm run typecheck`)
+- [x] フォーマットエラーがないことを確認 (`npm run format:check`)
 
 ---
 
@@ -77,12 +77,16 @@
 
 ### うまくいったこと
 
--
+- 既存パターン（BookCard、BookForm、useBooks等）を参考にすることで、一貫性のある実装ができた
+- バックエンドAPIの設計をdesign.mdで事前に明確化していたため、スムーズに実装できた
+- ページネーション対応の戦闘ログ取得APIを実装し、将来の大量データ対応が可能になった
 
 ### 改善点
 
--
+- SkillTagInputコンポーネントのprops仕様を事前確認すべきだった（suggestionsが必須）
+- DQWindowにonClickがない点を事前確認すべきだった
 
 ### 次回への学び
 
--
+- 既存コンポーネントを再利用する際は、事前にpropsの型定義を確認する
+- モーダル実装時は、click-outside-to-close機能をどう実現するか事前に検討する

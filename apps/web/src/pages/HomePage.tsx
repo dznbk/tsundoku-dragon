@@ -15,9 +15,13 @@ import styles from './HomePage.module.css';
 
 interface HomePageProps {
   onNavigateToRegister: () => void;
+  onNavigateToBookDetail: (bookId: string) => void;
 }
 
-export function HomePage({ onNavigateToRegister }: HomePageProps) {
+export function HomePage({
+  onNavigateToRegister,
+  onNavigateToBookDetail,
+}: HomePageProps) {
   const { isLoading } = useBooks();
   const { userName, completedCount, totalPagesRead, topSkills } =
     useUserStatus();
@@ -49,7 +53,10 @@ export function HomePage({ onNavigateToRegister }: HomePageProps) {
         {isLoading ? (
           <div className={styles.loading}>読み込み中...</div>
         ) : (
-          <BookGrid books={filteredBooks} />
+          <BookGrid
+            books={filteredBooks}
+            onBookClick={onNavigateToBookDetail}
+          />
         )}
       </section>
 

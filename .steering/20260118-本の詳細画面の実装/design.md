@@ -8,10 +8,10 @@
 
 ### 代替案との比較
 
-| 案                          | メリット                     | デメリット                   | 採用 |
-| --------------------------- | ---------------------------- | ---------------------------- | ---- |
-| 既存パターン踏襲            | 一貫性あり、学習コスト低     | -                            | ✓    |
-| 新規パターン（React Router) | URLベースのナビゲーション    | 既存コードとの整合性が必要   | -    |
+| 案                          | メリット                  | デメリット                 | 採用 |
+| --------------------------- | ------------------------- | -------------------------- | ---- |
+| 既存パターン踏襲            | 一貫性あり、学習コスト低  | -                          | ✓    |
+| 新規パターン（React Router) | URLベースのナビゲーション | 既存コードとの整合性が必要 | -    |
 
 ### 選定理由
 
@@ -55,39 +55,39 @@
 
 #### フロントエンド
 
-| ファイル                                                     | 種別 | 責務                       |
-| ------------------------------------------------------------ | ---- | -------------------------- |
-| `apps/web/src/pages/BookDetailPage.tsx`                      | 新規 | 本の詳細ページ             |
-| `apps/web/src/pages/BookDetailPage.module.css`               | 新規 | 詳細ページスタイル         |
-| `apps/web/src/features/books/components/BookInfo.tsx`        | 新規 | 本の基本情報表示           |
-| `apps/web/src/features/books/components/BookInfo.module.css` | 新規 | 本情報スタイル             |
-| `apps/web/src/features/books/components/BattleLogList.tsx`   | 新規 | 戦闘ログ一覧               |
-| `apps/web/src/features/books/components/BattleLogList.module.css` | 新規 | ログ一覧スタイル       |
-| `apps/web/src/features/books/components/BookEditModal.tsx`   | 新規 | 本編集モーダル             |
-| `apps/web/src/features/books/components/BookEditModal.module.css` | 新規 | 編集モーダルスタイル   |
-| `apps/web/src/features/books/components/Pagination.tsx`      | 新規 | ページネーション           |
-| `apps/web/src/features/books/components/Pagination.module.css` | 新規 | ページネーションスタイル |
-| `apps/web/src/features/books/hooks/useBookDetail.ts`         | 新規 | 本詳細取得フック           |
-| `apps/web/src/features/books/hooks/useBattleLogs.ts`         | 新規 | 戦闘ログ取得フック         |
-| `apps/web/src/features/books/services/bookApi.ts`            | 変更 | API関数追加                |
-| `apps/web/src/features/books/components/BookCard.tsx`        | 変更 | タップ可能に               |
-| `apps/web/src/features/books/components/index.ts`            | 変更 | export追加                 |
-| `apps/web/src/App.tsx`                                       | 変更 | ページ遷移追加             |
+| ファイル                                                          | 種別 | 責務                     |
+| ----------------------------------------------------------------- | ---- | ------------------------ |
+| `apps/web/src/pages/BookDetailPage.tsx`                           | 新規 | 本の詳細ページ           |
+| `apps/web/src/pages/BookDetailPage.module.css`                    | 新規 | 詳細ページスタイル       |
+| `apps/web/src/features/books/components/BookInfo.tsx`             | 新規 | 本の基本情報表示         |
+| `apps/web/src/features/books/components/BookInfo.module.css`      | 新規 | 本情報スタイル           |
+| `apps/web/src/features/books/components/BattleLogList.tsx`        | 新規 | 戦闘ログ一覧             |
+| `apps/web/src/features/books/components/BattleLogList.module.css` | 新規 | ログ一覧スタイル         |
+| `apps/web/src/features/books/components/BookEditModal.tsx`        | 新規 | 本編集モーダル           |
+| `apps/web/src/features/books/components/BookEditModal.module.css` | 新規 | 編集モーダルスタイル     |
+| `apps/web/src/features/books/components/Pagination.tsx`           | 新規 | ページネーション         |
+| `apps/web/src/features/books/components/Pagination.module.css`    | 新規 | ページネーションスタイル |
+| `apps/web/src/features/books/hooks/useBookDetail.ts`              | 新規 | 本詳細取得フック         |
+| `apps/web/src/features/books/hooks/useBattleLogs.ts`              | 新規 | 戦闘ログ取得フック       |
+| `apps/web/src/features/books/services/bookApi.ts`                 | 変更 | API関数追加              |
+| `apps/web/src/features/books/components/BookCard.tsx`             | 変更 | タップ可能に             |
+| `apps/web/src/features/books/components/index.ts`                 | 変更 | export追加               |
+| `apps/web/src/App.tsx`                                            | 変更 | ページ遷移追加           |
 
 #### バックエンド
 
-| ファイル                                              | 種別 | 責務                   |
-| ----------------------------------------------------- | ---- | ---------------------- |
-| `apps/api/src/routes/books.ts`                        | 変更 | エンドポイント追加     |
-| `apps/api/src/routes/books.test.ts`                   | 変更 | テスト追加             |
-| `apps/api/src/services/bookService.ts`                | 変更 | メソッド追加           |
-| `apps/api/src/services/bookService.test.ts`           | 変更 | テスト追加             |
-| `apps/api/src/repositories/bookRepository.ts`         | 変更 | メソッド追加           |
-| `apps/api/src/repositories/bookRepository.test.ts`    | 変更 | テスト追加             |
-| `apps/api/src/repositories/battleLogRepository.ts`    | 新規 | 戦闘ログリポジトリ     |
-| `apps/api/src/repositories/battleLogRepository.test.ts` | 新規 | リポジトリテスト     |
-| `apps/api/src/types/api.ts`                           | 変更 | スキーマ追加           |
-| `packages/shared/src/index.ts`                        | 変更 | BattleLog型追加        |
+| ファイル                                                | 種別 | 責務               |
+| ------------------------------------------------------- | ---- | ------------------ |
+| `apps/api/src/routes/books.ts`                          | 変更 | エンドポイント追加 |
+| `apps/api/src/routes/books.test.ts`                     | 変更 | テスト追加         |
+| `apps/api/src/services/bookService.ts`                  | 変更 | メソッド追加       |
+| `apps/api/src/services/bookService.test.ts`             | 変更 | テスト追加         |
+| `apps/api/src/repositories/bookRepository.ts`           | 変更 | メソッド追加       |
+| `apps/api/src/repositories/bookRepository.test.ts`      | 変更 | テスト追加         |
+| `apps/api/src/repositories/battleLogRepository.ts`      | 新規 | 戦闘ログリポジトリ |
+| `apps/api/src/repositories/battleLogRepository.test.ts` | 新規 | リポジトリテスト   |
+| `apps/api/src/types/api.ts`                             | 変更 | スキーマ追加       |
+| `packages/shared/src/index.ts`                          | 変更 | BattleLog型追加    |
 
 ### 主要コンポーネント
 
@@ -193,7 +193,9 @@ Book
 
 ```typescript
 // Response
-{ success: true }
+{
+  success: true;
+}
 ```
 
 #### POST /books/:id/reset
@@ -202,7 +204,7 @@ Book
 
 ```typescript
 // Response
-Book
+Book;
 ```
 
 ## テスト戦略

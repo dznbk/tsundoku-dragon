@@ -52,3 +52,13 @@
 .secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
 }
+
+.danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: transparent;
+}
+
+.danger:hover:not(:disabled) {
+  background: rgba(231, 76, 60, 0.2);
+}

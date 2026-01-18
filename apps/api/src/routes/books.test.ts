@@ -10,12 +10,24 @@ vi.mock('nanoid', () => ({
 const mockSave = vi.fn();
 const mockFindByUserId = vi.fn();
 const mockFindById = vi.fn();
+const mockUpdate = vi.fn();
+const mockSoftDelete = vi.fn();
 
 vi.mock('../repositories/bookRepository', () => ({
   BookRepository: class {
     save = mockSave;
     findByUserId = mockFindByUserId;
     findById = mockFindById;
+    update = mockUpdate;
+    softDelete = mockSoftDelete;
+  },
+}));
+
+const mockFindByBookId = vi.fn();
+
+vi.mock('../repositories/battleLogRepository', () => ({
+  BattleLogRepository: class {
+    findByBookId = mockFindByBookId;
   },
 }));
 
@@ -187,6 +199,209 @@ describe('Books Routes', () => {
       expect(res.status).toBe(404);
       const body = (await res.json()) as { error: string };
       expect(body.error).toBe('Book not found');
+    });
+  });
+
+  describe('PUT /books/:id', () => {
+    it('本を更新して返す', async () => {
+      const mockBook: Book = {
+        id: 'book-123',
+        userId: 'test-user',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 0,
+        status: 'reading',
+        skills: [],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      const updatedBook: Book = {
+        ...mockBook,
+        title: '更新後のタイトル',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const res = await app.request(
+        '/books/book-123',
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: '更新後のタイトル' }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as Book;
+      expect(body.title).toBe('更新後のタイトル');
+    });
+
+    it('存在しない本は404を返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const res = await app.request(
+        '/books/not-exist',
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: '更新後のタイトル' }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('DELETE /books/:id', () => {
+    it('本を削除してsuccessを返す', async () => {
+      const mockBook: Book = {
+        id: 'book-123',
+        userId: 'test-user',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 0,
+        status: 'reading',
+        skills: [],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockSoftDelete.mockResolvedValueOnce(undefined);
+
+      const res = await app.request(
+        '/books/book-123',
+        { method: 'DELETE' },
+        mockEnv
+      );
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { success: boolean };
+      expect(body.success).toBe(true);
+    });
+
+    it('存在しない本は404を返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const res = await app.request(
+        '/books/not-exist',
+        { method: 'DELETE' },
+        mockEnv
+      );
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('POST /books/:id/reset', () => {
+    it('討伐済みの本をリセットして返す', async () => {
+      const mockBook: Book = {
+        id: 'book-123',
+        userId: 'test-user',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 100,
+        status: 'completed',
+        skills: [],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      const resetBook: Book = {
+        ...mockBook,
+        currentPage: 0,
+        status: 'reading',
+        round: 2,
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockUpdate.mockResolvedValueOnce(resetBook);
+
+      const res = await app.request(
+        '/books/book-123/reset',
+        { method: 'POST' },
+        mockEnv
+      );
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as Book;
+      expect(body.currentPage).toBe(0);
+      expect(body.status).toBe('reading');
+      expect(body.round).toBe(2);
+    });
+
+    it('戦闘中の本は404を返す', async () => {
+      const mockBook: Book = {
+        id: 'book-123',
+        userId: 'test-user',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 50,
+        status: 'reading',
+        skills: [],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      mockFindById.mockResolvedValueOnce(mockBook);
+
+      const res = await app.request(
+        '/books/book-123/reset',
+        { method: 'POST' },
+        mockEnv
+      );
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('GET /books/:id/logs', () => {
+    it('戦闘ログ一覧を返す', async () => {
+      const mockBook: Book = {
+        id: 'book-123',
+        userId: 'test-user',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 50,
+        status: 'reading',
+        skills: [],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockFindByBookId.mockResolvedValueOnce({
+        logs: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      });
+
+      const res = await app.request('/books/book-123/logs', {}, mockEnv);
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        logs: unknown[];
+        pagination: { currentPage: number };
+      };
+      expect(body.logs).toEqual([]);
+      expect(body.pagination.currentPage).toBe(1);
+    });
+
+    it('存在しない本は404を返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const res = await app.request('/books/not-exist/logs', {}, mockEnv);
+
+      expect(res.status).toBe(404);
     });
   });
 });

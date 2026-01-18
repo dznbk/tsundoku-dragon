@@ -3,7 +3,7 @@ import styles from './DQButton.module.css';
 
 interface DQButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
 }
 
 export function DQButton({

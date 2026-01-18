@@ -1,4 +1,9 @@
-import { PutCommand, QueryCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  PutCommand,
+  QueryCommand,
+  GetCommand,
+  UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
 import type { Book } from '@tsundoku-dragon/shared';
 import { createDynamoDBClient, type Env } from '../lib/dynamodb';
 
@@ -57,6 +62,62 @@ export class BookRepository {
       })
     );
     return result.Item ? this.toBook(result.Item) : null;
+  }
+
+  async update(
+    userId: string,
+    bookId: string,
+    updates: Partial<
+      Pick<
+        Book,
+        | 'title'
+        | 'totalPages'
+        | 'skills'
+        | 'status'
+        | 'currentPage'
+        | 'round'
+        | 'updatedAt'
+      >
+    >
+  ): Promise<Book | null> {
+    const updateExpressions: string[] = [];
+    const expressionAttributeNames: Record<string, string> = {};
+    const expressionAttributeValues: Record<string, unknown> = {};
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== undefined) {
+        updateExpressions.push(`#${key} = :${key}`);
+        expressionAttributeNames[`#${key}`] = key;
+        expressionAttributeValues[`:${key}`] = value;
+      }
+    });
+
+    if (updateExpressions.length === 0) {
+      return this.findById(userId, bookId);
+    }
+
+    const result = await this.client.send(
+      new UpdateCommand({
+        TableName: this.tableName,
+        Key: {
+          PK: this.buildPK(userId),
+          SK: this.buildSK(bookId),
+        },
+        UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW',
+      })
+    );
+
+    return result.Attributes ? this.toBook(result.Attributes) : null;
+  }
+
+  async softDelete(userId: string, bookId: string): Promise<void> {
+    await this.update(userId, bookId, {
+      status: 'archived',
+      updatedAt: new Date().toISOString(),
+    });
   }
 
   private toBook(item: Record<string, unknown>): Book {
