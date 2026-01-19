@@ -1,7 +1,7 @@
 // 共通の型定義
 // TODO: 実装時に追加
 
-export type BookStatus = 'reading' | 'completed';
+export type BookStatus = 'reading' | 'completed' | 'archived';
 
 export interface Book {
   id: string;
@@ -21,4 +21,12 @@ export interface Skill {
   name: string;
   level: number;
   totalExp: number;
+}
+
+export interface BattleLog {
+  id: string;
+  bookId: string;
+  pagesRead: number;
+  memo?: string;
+  createdAt: string;
 }

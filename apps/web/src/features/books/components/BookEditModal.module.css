@@ -1,0 +1,74 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--color-text);
+  margin: 0 0 16px 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error {
+  padding: 8px 12px;
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: 4px;
+  color: var(--color-error);
+  font-size: 0.875rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.input {
+  padding: 8px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}

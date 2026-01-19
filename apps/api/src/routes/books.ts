@@ -3,7 +3,11 @@ import { zValidator } from '@hono/zod-validator';
 import type { Env } from '../types/env';
 import { getAuthUserId } from '../middleware/auth';
 import { BookService } from '../services/bookService';
-import { createBookSchema } from '../types/api';
+import {
+  createBookSchema,
+  updateBookSchema,
+  logsQuerySchema,
+} from '../types/api';
 
 const books = new Hono<{ Bindings: Env }>();
 
@@ -31,6 +35,91 @@ books.get('/:id', async (c) => {
     return c.json({ error: 'Book not found' }, 404);
   }
   return c.json(book);
+});
+
+books.put('/:id', zValidator('json', updateBookSchema), async (c) => {
+  const userId = getAuthUserId(c);
+  const bookId = c.req.param('id');
+  const input = c.req.valid('json');
+  const service = new BookService(c.env);
+
+  try {
+    const book = await service.updateBook(userId, bookId, input);
+    if (!book) {
+      return c.json({ error: 'Book not found' }, 404);
+    }
+    return c.json(book);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === 'Cannot update archived book'
+    ) {
+      return c.json({ error: error.message }, 400);
+    }
+    throw error;
+  }
+});
+
+books.delete('/:id', async (c) => {
+  const userId = getAuthUserId(c);
+  const bookId = c.req.param('id');
+  const service = new BookService(c.env);
+
+  try {
+    const success = await service.archiveBook(userId, bookId);
+    if (!success) {
+      return c.json({ error: 'Book not found' }, 404);
+    }
+    return c.body(null, 204);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === 'Book is already archived'
+    ) {
+      return c.json({ error: error.message }, 400);
+    }
+    throw error;
+  }
+});
+
+books.post('/:id/reset', async (c) => {
+  const userId = getAuthUserId(c);
+  const bookId = c.req.param('id');
+  const service = new BookService(c.env);
+
+  try {
+    const book = await service.resetBook(userId, bookId);
+    if (!book) {
+      return c.json({ error: 'Book not found' }, 404);
+    }
+    return c.json(book);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === 'Can only reset completed books'
+    ) {
+      return c.json({ error: error.message }, 400);
+    }
+    throw error;
+  }
+});
+
+books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
+  const userId = getAuthUserId(c);
+  const bookId = c.req.param('id');
+  const query = c.req.valid('query');
+  const service = new BookService(c.env);
+
+  const result = await service.getBookLogs(userId, bookId, {
+    limit: query.limit,
+    cursor: query.cursor,
+  });
+
+  if (!result) {
+    return c.json({ error: 'Book not found' }, 404);
+  }
+
+  return c.json(result);
 });
 
 export default books;
