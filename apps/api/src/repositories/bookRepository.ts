@@ -78,8 +78,7 @@ export class BookRepository {
   }
 
   private toBook(item: Record<string, unknown>): Book {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { PK, SK, ...book } = item;
+    const { PK: _PK, SK: _SK, ...book } = item;
     return book as unknown as Book;
   }
 
@@ -87,8 +86,7 @@ export class BookRepository {
     item: Record<string, unknown>,
     bookId: string
   ): BattleLog {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { PK, SK, ...log } = item;
+    const { PK: _PK, SK: _SK, ...log } = item;
     return {
       ...log,
       bookId,
