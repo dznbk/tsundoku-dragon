@@ -85,12 +85,20 @@
 - タイトル検索機能（TitleSearchInput、NDL API、useTitleSearch）
 - ホーム画面（本一覧）（BookGrid、BookCard、ProgressBar、UserStatus、CompletedToggle、BottomActionBar）
 - ステージング環境構築（Cloudflare Workers、GitHub Actions CD、カスタムドメイン、Cloudflare Access）
+- 本の詳細画面（BookDetailPage、BookInfo、BattleLogList、BookEditModal、編集/削除/再戦API）
 
 ### 次にやること
 
-1. 本番環境の構築
+1. 戦闘画面・戦闘ログ記録API
+   - 読書進捗の記録（`POST /books/:id/logs`）
+   - ドラクエ風演出（攻撃メッセージ、HPバー減少アニメーション）
+   - 討伐時の経験値表示、レベルアップ通知
+   - 経験値計算（1ページ=1exp、討伐ボーナス10%）
+2. スキル一覧画面
+   - スキルレベル・経験値バー表示
+   - ソート機能（レベル順、名前順、最近更新順）
+3. 本番環境の構築
    - 計画: [planning/deployment-plan.md](../planning/deployment-plan.md)
-2. 本の詳細画面
 
 ### スキップ
 
