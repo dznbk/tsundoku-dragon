@@ -7,7 +7,6 @@ import {
   createBookSchema,
   updateBookSchema,
   logsQuerySchema,
-  createBattleLogSchema,
 } from '../types/api';
 
 const books = new Hono<{ Bindings: Env }>();
@@ -122,32 +121,5 @@ books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
 
   return c.json(result);
 });
-
-books.post(
-  '/:id/logs',
-  zValidator('json', createBattleLogSchema),
-  async (c) => {
-    const userId = getAuthUserId(c);
-    const bookId = c.req.param('id');
-    const input = c.req.valid('json');
-    const service = new BookService(c.env);
-
-    try {
-      const result = await service.recordBattle(userId, bookId, input);
-      if (!result) {
-        return c.json({ error: 'Book not found' }, 404);
-      }
-      return c.json(result, 201);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === 'Book is not in reading status'
-      ) {
-        return c.json({ error: error.message }, 400);
-      }
-      throw error;
-    }
-  }
-);
 
 export default books;
