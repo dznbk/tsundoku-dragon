@@ -64,7 +64,7 @@ describe('BookRepository', () => {
   });
 
   describe('findByUserId', () => {
-    it('begins_withで正しくクエリする', async () => {
+    it('begins_withで正しくクエリしログを除外する', async () => {
       mockSend.mockResolvedValueOnce({
         Items: [{ PK: 'USER#user-456', SK: 'BOOK#book-123', ...mockBook }],
       });
@@ -81,6 +81,25 @@ describe('BookRepository', () => {
           ':skPrefix': 'BOOK#',
         },
       });
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('book-123');
+    });
+
+    it('ログエントリ（#LOG#を含むSK）を除外する', async () => {
+      mockSend.mockResolvedValueOnce({
+        Items: [
+          { PK: 'USER#user-456', SK: 'BOOK#book-123', ...mockBook },
+          {
+            PK: 'USER#user-456',
+            SK: 'BOOK#book-123#LOG#2024-01-01T12:00:00Z',
+            id: 'log-1',
+            pagesRead: 30,
+          },
+        ],
+      });
+
+      const result = await repository.findByUserId('user-456');
+
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('book-123');
     });
