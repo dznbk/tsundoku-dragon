@@ -1,12 +1,22 @@
 import { nanoid } from 'nanoid';
-import type { Book } from '@tsundoku-dragon/shared';
+import type { Book, BattleLog } from '@tsundoku-dragon/shared';
 import {
   BookRepository,
   type LogsQueryResult,
 } from '../repositories/bookRepository';
 import { SkillRepository } from '../repositories/skillRepository';
-import type { CreateBookInput, UpdateBookInput } from '../types/api';
+import type {
+  CreateBookInput,
+  UpdateBookInput,
+  CreateBattleLogInput,
+} from '../types/api';
 import type { Env } from '../lib/dynamodb';
+
+export interface RecordBattleResult {
+  log: BattleLog;
+  book: Book;
+  defeat: boolean;
+}
 
 export class BookService {
   private repository: BookRepository;
@@ -154,5 +164,48 @@ export class BookService {
     }
 
     return this.repository.findLogs(userId, bookId, options);
+  }
+
+  async recordBattle(
+    userId: string,
+    bookId: string,
+    input: CreateBattleLogInput
+  ): Promise<RecordBattleResult | null> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      return null;
+    }
+
+    if (book.status !== 'reading') {
+      throw new Error('Book is not in reading status');
+    }
+
+    const now = new Date().toISOString();
+    const remainingPages = book.totalPages - book.currentPage;
+    const actualPagesRead = Math.min(input.pagesRead, remainingPages);
+    const newCurrentPage = book.currentPage + actualPagesRead;
+    const isDefeated = newCurrentPage >= book.totalPages;
+
+    const log: BattleLog = {
+      id: nanoid(),
+      bookId,
+      pagesRead: actualPagesRead,
+      memo: input.memo,
+      createdAt: now,
+    };
+
+    await this.repository.saveLog(userId, bookId, log);
+
+    const updatedBook = await this.repository.update(userId, bookId, {
+      currentPage: newCurrentPage,
+      status: isDefeated ? 'completed' : 'reading',
+      updatedAt: now,
+    });
+
+    return {
+      log,
+      book: updatedBook!,
+      defeat: isDefeated,
+    };
   }
 }
