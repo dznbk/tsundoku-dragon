@@ -23,3 +23,10 @@ export const logsQuerySchema = z.object({
 });
 
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
+
+export const createBattleLogSchema = z.object({
+  pagesRead: z.number().int().positive('ページ数は1以上の整数です'),
+  memo: z.string().max(1000, 'メモは1000文字以内です').optional(),
+});
+
+export type CreateBattleLogInput = z.infer<typeof createBattleLogSchema>;

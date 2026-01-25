@@ -11,6 +11,7 @@ const mockFindByUserId = vi.fn();
 const mockFindById = vi.fn();
 const mockUpdate = vi.fn();
 const mockFindLogs = vi.fn();
+const mockSaveLog = vi.fn();
 
 vi.mock('../repositories/bookRepository', () => ({
   BookRepository: class {
@@ -19,6 +20,7 @@ vi.mock('../repositories/bookRepository', () => ({
     findById = mockFindById;
     update = mockUpdate;
     findLogs = mockFindLogs;
+    saveLog = mockSaveLog;
   },
 }));
 
@@ -494,6 +496,125 @@ describe('BookService', () => {
         limit: 10,
         cursor: 'abc',
       });
+    });
+  });
+
+  describe('recordBattle', () => {
+    const mockReadingBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 50,
+      status: 'reading',
+      skills: ['TypeScript'],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('ログを記録してcurrentPageを更新する', async () => {
+      mockFindById.mockResolvedValueOnce(mockReadingBook);
+      const updatedBook = { ...mockReadingBook, currentPage: 80 };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 30,
+        memo: 'テストメモ',
+      });
+
+      expect(mockSaveLog).toHaveBeenCalledWith('user-123', 'book-123', {
+        id: 'generated-id-123',
+        bookId: 'book-123',
+        pagesRead: 30,
+        memo: 'テストメモ',
+        createdAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 80,
+        status: 'reading',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.log.pagesRead).toBe(30);
+      expect(result?.book.currentPage).toBe(80);
+      expect(result?.defeat).toBe(false);
+    });
+
+    it('討伐時にstatusがcompletedになる', async () => {
+      mockFindById.mockResolvedValueOnce(mockReadingBook);
+      const completedBook = {
+        ...mockReadingBook,
+        currentPage: 100,
+        status: 'completed',
+      };
+      mockUpdate.mockResolvedValueOnce(completedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 50,
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 100,
+        status: 'completed',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.defeat).toBe(true);
+    });
+
+    it('pagesReadが残りページを超えた場合、自動補正される', async () => {
+      mockFindById.mockResolvedValueOnce(mockReadingBook);
+      const completedBook = {
+        ...mockReadingBook,
+        currentPage: 100,
+        status: 'completed',
+      };
+      mockUpdate.mockResolvedValueOnce(completedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 100,
+      });
+
+      expect(mockSaveLog).toHaveBeenCalledWith(
+        'user-123',
+        'book-123',
+        expect.objectContaining({ pagesRead: 50 })
+      );
+      expect(result?.log.pagesRead).toBe(50);
+      expect(result?.defeat).toBe(true);
+    });
+
+    it('存在しない本はnullを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.recordBattle('user-123', 'not-exist', {
+        pagesRead: 30,
+      });
+
+      expect(result).toBeNull();
+      expect(mockSaveLog).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('reading以外のstatusはエラー', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockReadingBook,
+        status: 'completed',
+      });
+
+      await expect(
+        service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
+      ).rejects.toThrow('Book is not in reading status');
+    });
+
+    it('archived状態の本はエラー', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockReadingBook,
+        status: 'archived',
+      });
+
+      await expect(
+        service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
+      ).rejects.toThrow('Book is not in reading status');
     });
   });
 });
