@@ -94,3 +94,37 @@
 
 - Issue #56（経験値計算・スキル更新ロジック）で、recordBattle の結果を使って経験値を加算する処理を追加予定
 - Issue #57（戦闘画面UI）で、この API を呼び出すフロントエンド実装を行う予定
+
+---
+
+## 追加対応 (2026-01-26)
+
+### フィードバック内容
+
+- CI の統合テストが失敗: `findByUserId` がログエントリ（`BOOK#xxx#LOG#...`）も返してしまう問題
+- 統合テストの並列実行による競合: `cleanupTestData` が他のテストファイルのデータを削除してしまう
+
+### 追加タスク
+
+- [x] `BookRepository.findByUserId` でログエントリを除外するフィルタを追加
+- [x] ユニットテストにログ除外のテストケースを追加
+- [x] 統合テスト設定に `fileParallelism: false` を追加
+- [x] `bookRepository.integration.test.ts` に `beforeEach` でのクリーンアップを追加
+- [x] CI が通ることを確認
+
+### 振り返り
+
+#### うまくいったこと
+
+- DynamoDB の FilterExpression で SK をフィルタリングできない制約に気づき、アプリケーション側でのフィルタリングに切り替えた
+- 統合テストの並列実行問題を `fileParallelism: false` で解決
+
+#### 学んだこと
+
+- DynamoDB の FilterExpression はプライマリキー属性（PK, SK）には使用できない
+- DynamoDB Local と本番 DynamoDB で `attribute_exists` の挙動が異なる可能性がある
+- 統合テストで共有リソースを使用する場合は、テストファイルの直列実行を検討する
+
+#### 申し送り事項
+
+- 将来的にログ数が増えた場合、`findByUserId` のパフォーマンスに影響する可能性がある（全件取得後にフィルタリングしているため）
