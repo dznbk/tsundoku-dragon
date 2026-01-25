@@ -108,8 +108,9 @@
 
 - [x] `BookRepository.findByUserId` でログエントリを除外するフィルタを追加
 - [x] ユニットテストにログ除外のテストケースを追加
-- [x] 統合テスト設定に `fileParallelism: false` を追加
-- [x] `bookRepository.integration.test.ts` に `beforeEach` でのクリーンアップを追加
+- [x] ~~統合テスト設定に `fileParallelism: false` を追加~~ → テストの独立性を確保して並列実行可能に
+- [x] ~~`bookRepository.integration.test.ts` に `beforeEach` でのクリーンアップを追加~~ → ユニークIDでの独立性確保に変更
+- [x] 統合テストの独立性を確保（各テストでユニークな userId を使用）
 - [x] CI が通ることを確認
 
 ### 振り返り
@@ -117,13 +118,13 @@
 #### うまくいったこと
 
 - DynamoDB の FilterExpression で SK をフィルタリングできない制約に気づき、アプリケーション側でのフィルタリングに切り替えた
-- 統合テストの並列実行問題を `fileParallelism: false` で解決
+- 統合テストの独立性を確保し、並列実行でも安定してテストが通るようになった
 
 #### 学んだこと
 
 - DynamoDB の FilterExpression はプライマリキー属性（PK, SK）には使用できない
 - DynamoDB Local と本番 DynamoDB で `attribute_exists` の挙動が異なる可能性がある
-- 統合テストで共有リソースを使用する場合は、テストファイルの直列実行を検討する
+- 統合テストで共有リソースを使用する場合は、`cleanupTestData` のようなグローバルクリーンアップではなく、各テストでユニークなIDを使用して独立性を確保する
 
 #### 申し送り事項
 

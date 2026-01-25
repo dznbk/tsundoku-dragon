@@ -1,9 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { Book } from '@tsundoku-dragon/shared';
 import { BookRepository } from './bookRepository';
 import {
   setupTestDB,
-  cleanupTestData,
   createTestEnv,
   resetClients,
 } from '../test-utils/dynamodb-helper';
@@ -43,13 +42,7 @@ describe('BookRepository Integration', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
     resetClients();
-  });
-
-  beforeEach(async () => {
-    // 各テスト前にデータをクリーンアップしてテスト間の独立性を確保
-    await cleanupTestData();
   });
 
   describe('save & findById', () => {
