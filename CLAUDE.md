@@ -49,6 +49,14 @@
 
 ## 重要なルール
 
+### GitHub Issue の閲覧
+
+Projects Classic の廃止に伴い、`gh issue view` はエラーになる場合がある。`--json` フラグで必要なフィールドを指定すること。
+
+```bash
+gh issue view 56 --repo dznbk/tsundoku-dragon --json title,body,state
+```
+
 ### 日付の扱い
 
 - 日付を記載する際は必ず `date +%Y-%m-%d` コマンドで現在日付を確認すること
