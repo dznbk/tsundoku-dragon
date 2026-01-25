@@ -11,6 +11,7 @@ const mockFindByUserId = vi.fn();
 const mockFindById = vi.fn();
 const mockUpdate = vi.fn();
 const mockFindLogs = vi.fn();
+const mockSaveLog = vi.fn();
 
 vi.mock('../repositories/bookRepository', () => ({
   BookRepository: class {
@@ -19,6 +20,7 @@ vi.mock('../repositories/bookRepository', () => ({
     findById = mockFindById;
     update = mockUpdate;
     findLogs = mockFindLogs;
+    saveLog = mockSaveLog;
   },
 }));
 
@@ -494,6 +496,156 @@ describe('BookService', () => {
         limit: 10,
         cursor: 'abc',
       });
+    });
+  });
+
+  describe('recordBattle', () => {
+    const mockBook: Book = {
+      id: 'book-123',
+      userId: 'user-123',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 30,
+      status: 'reading',
+      skills: [],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('ログを記録しcurrentPageを更新する', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      const updatedBook = { ...mockBook, currentPage: 50 };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 20,
+      });
+
+      expect(mockSaveLog).toHaveBeenCalledWith(
+        'user-123',
+        'book-123',
+        expect.objectContaining({
+          id: 'generated-id-123',
+          bookId: 'book-123',
+          pagesRead: 20,
+          createdAt: '2024-01-01T00:00:00.000Z',
+        })
+      );
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 50,
+        status: 'reading',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.log.pagesRead).toBe(20);
+      expect(result?.book.currentPage).toBe(50);
+      expect(result?.defeat).toBe(false);
+    });
+
+    it('討伐時にstatusがcompletedになる', async () => {
+      mockFindById.mockResolvedValueOnce({ ...mockBook, currentPage: 80 });
+      const updatedBook = {
+        ...mockBook,
+        currentPage: 100,
+        status: 'completed' as const,
+      };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 20,
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 100,
+        status: 'completed',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.defeat).toBe(true);
+      expect(result?.book.status).toBe('completed');
+    });
+
+    it('pagesReadが残りページを超えた場合、自動補正される', async () => {
+      mockFindById.mockResolvedValueOnce({ ...mockBook, currentPage: 90 });
+      const updatedBook = {
+        ...mockBook,
+        currentPage: 100,
+        status: 'completed' as const,
+      };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const result = await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 50,
+      });
+
+      expect(mockSaveLog).toHaveBeenCalledWith(
+        'user-123',
+        'book-123',
+        expect.objectContaining({
+          pagesRead: 10,
+        })
+      );
+      expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
+        currentPage: 100,
+        status: 'completed',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+      expect(result?.log.pagesRead).toBe(10);
+      expect(result?.defeat).toBe(true);
+    });
+
+    it('memoを記録できる', async () => {
+      mockFindById.mockResolvedValueOnce(mockBook);
+      mockUpdate.mockResolvedValueOnce({ ...mockBook, currentPage: 50 });
+
+      await service.recordBattle('user-123', 'book-123', {
+        pagesRead: 20,
+        memo: 'テストメモ',
+      });
+
+      expect(mockSaveLog).toHaveBeenCalledWith(
+        'user-123',
+        'book-123',
+        expect.objectContaining({
+          memo: 'テストメモ',
+        })
+      );
+    });
+
+    it('存在しない本はnullを返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const result = await service.recordBattle('user-123', 'not-exist', {
+        pagesRead: 20,
+      });
+
+      expect(result).toBeNull();
+      expect(mockSaveLog).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('reading以外のstatusはエラー', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockBook,
+        status: 'completed',
+      });
+
+      await expect(
+        service.recordBattle('user-123', 'book-123', { pagesRead: 20 })
+      ).rejects.toThrow('Book is not in reading status');
+
+      expect(mockSaveLog).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('archivedの本もエラー', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockBook,
+        status: 'archived',
+      });
+
+      await expect(
+        service.recordBattle('user-123', 'book-123', { pagesRead: 20 })
+      ).rejects.toThrow('Book is not in reading status');
     });
   });
 });
