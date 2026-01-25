@@ -27,12 +27,16 @@ vi.mock('../repositories/bookRepository', () => ({
 const mockFindGlobalSkills = vi.fn();
 const mockFindUserCustomSkills = vi.fn();
 const mockSaveUserCustomSkill = vi.fn();
+const mockFindUserSkillExp = vi.fn();
+const mockUpsertUserSkillExp = vi.fn();
 
 vi.mock('../repositories/skillRepository', () => ({
   SkillRepository: class {
     findGlobalSkills = mockFindGlobalSkills;
     findUserCustomSkills = mockFindUserCustomSkills;
     saveUserCustomSkill = mockSaveUserCustomSkill;
+    findUserSkillExp = mockFindUserSkillExp;
+    upsertUserSkillExp = mockUpsertUserSkillExp;
   },
 }));
 
@@ -646,6 +650,144 @@ describe('BookService', () => {
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 20 })
       ).rejects.toThrow('Book is not in reading status');
+    });
+
+    describe('経験値計算', () => {
+      const mockBookWithSkills: Book = {
+        id: 'book-123',
+        userId: 'user-123',
+        title: 'テスト本',
+        totalPages: 100,
+        currentPage: 30,
+        status: 'reading',
+        skills: ['TypeScript', 'Node.js'],
+        round: 1,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      beforeEach(() => {
+        mockFindUserSkillExp.mockResolvedValue(null);
+        mockUpsertUserSkillExp.mockImplementation(
+          (_userId: string, skillName: string, expToAdd: number) =>
+            Promise.resolve({
+              name: skillName,
+              exp: expToAdd,
+              level: 1,
+            })
+        );
+      });
+
+      it('経験値が各スキルに付与される', async () => {
+        mockFindById.mockResolvedValueOnce(mockBookWithSkills);
+        const updatedBook = { ...mockBookWithSkills, currentPage: 50 };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 20,
+        });
+
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledTimes(2);
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'TypeScript',
+          20
+        );
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'Node.js',
+          20
+        );
+        expect(result?.expGained).toBe(20);
+        expect(result?.defeatBonus).toBe(0);
+        expect(result?.skillResults).toHaveLength(2);
+      });
+
+      it('討伐時にボーナスが加算される', async () => {
+        mockFindById.mockResolvedValueOnce({
+          ...mockBookWithSkills,
+          totalPages: 350,
+          currentPage: 340,
+        });
+        const updatedBook = {
+          ...mockBookWithSkills,
+          totalPages: 350,
+          currentPage: 350,
+          status: 'completed' as const,
+        };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 10,
+        });
+
+        // baseExp = 10, defeatBonus = 35 (350 * 0.1), total = 45
+        expect(result?.expGained).toBe(45);
+        expect(result?.defeatBonus).toBe(35);
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'TypeScript',
+          45
+        );
+      });
+
+      it('レベルアップが正しく検出される', async () => {
+        mockFindById.mockResolvedValueOnce(mockBookWithSkills);
+        mockUpdate.mockResolvedValueOnce({
+          ...mockBookWithSkills,
+          currentPage: 80,
+        });
+
+        // TypeScript: level 1 → level 2
+        mockFindUserSkillExp
+          .mockResolvedValueOnce({ name: 'TypeScript', exp: 30, level: 1 })
+          .mockResolvedValueOnce({ name: 'Node.js', exp: 30, level: 1 });
+
+        mockUpsertUserSkillExp
+          .mockResolvedValueOnce({ name: 'TypeScript', exp: 80, level: 2 })
+          .mockResolvedValueOnce({ name: 'Node.js', exp: 80, level: 2 });
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 50,
+        });
+
+        expect(result?.skillResults[0]).toEqual({
+          skillName: 'TypeScript',
+          expGained: 50,
+          previousLevel: 1,
+          currentLevel: 2,
+          currentExp: 80,
+          leveledUp: true,
+        });
+        expect(result?.skillResults[1]).toEqual({
+          skillName: 'Node.js',
+          expGained: 50,
+          previousLevel: 1,
+          currentLevel: 2,
+          currentExp: 80,
+          leveledUp: true,
+        });
+      });
+
+      it('スキルがない本では経験値の更新が行われない', async () => {
+        mockFindById.mockResolvedValueOnce({
+          ...mockBookWithSkills,
+          skills: [],
+        });
+        mockUpdate.mockResolvedValueOnce({
+          ...mockBookWithSkills,
+          skills: [],
+          currentPage: 50,
+        });
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 20,
+        });
+
+        expect(mockUpsertUserSkillExp).not.toHaveBeenCalled();
+        expect(result?.skillResults).toEqual([]);
+        expect(result?.expGained).toBe(20);
+      });
     });
   });
 });

@@ -4,18 +4,34 @@ import {
   BookRepository,
   type LogsQueryResult,
 } from '../repositories/bookRepository';
-import { SkillRepository } from '../repositories/skillRepository';
+import {
+  SkillRepository,
+  type UserSkillExp,
+} from '../repositories/skillRepository';
 import type {
   CreateBookInput,
   UpdateBookInput,
   CreateBattleLogInput,
 } from '../types/api';
 import type { Env } from '../lib/dynamodb';
+import { defeatBonus as calculateDefeatBonus } from '../lib/expCalculator';
+
+export interface SkillResult {
+  skillName: string;
+  expGained: number;
+  previousLevel: number;
+  currentLevel: number;
+  currentExp: number;
+  leveledUp: boolean;
+}
 
 export interface RecordBattleResult {
   log: BattleLog;
   book: Book;
   defeat: boolean;
+  expGained: number;
+  defeatBonus: number;
+  skillResults: SkillResult[];
 }
 
 export class BookService {
@@ -202,10 +218,65 @@ export class BookService {
       updatedAt: now,
     });
 
+    // 経験値計算
+    const baseExp = actualPagesRead;
+    const bonus = isDefeated ? calculateDefeatBonus(book.totalPages) : 0;
+    const totalExpGained = baseExp + bonus;
+
+    // 各スキルの経験値更新（並列処理）
+    const skillResults = await this.updateSkillExps(
+      userId,
+      book.skills,
+      totalExpGained
+    );
+
     return {
       log,
       book: updatedBook!,
       defeat: isDefeated,
+      expGained: totalExpGained,
+      defeatBonus: bonus,
+      skillResults,
     };
+  }
+
+  private async updateSkillExps(
+    userId: string,
+    skills: string[],
+    expToAdd: number
+  ): Promise<SkillResult[]> {
+    if (skills.length === 0 || expToAdd === 0) {
+      return [];
+    }
+
+    // 各スキルの現在の状態を並列取得
+    const previousStates = await Promise.all(
+      skills.map((skillName) =>
+        this.skillRepository.findUserSkillExp(userId, skillName)
+      )
+    );
+
+    // 経験値を並列更新
+    const updatedStates = await Promise.all(
+      skills.map((skillName) =>
+        this.skillRepository.upsertUserSkillExp(userId, skillName, expToAdd)
+      )
+    );
+
+    // 結果を構築
+    return skills.map((skillName, index) => {
+      const previous: UserSkillExp | null = previousStates[index];
+      const updated: UserSkillExp = updatedStates[index];
+      const previousLevel = previous?.level ?? 1;
+
+      return {
+        skillName,
+        expGained: expToAdd,
+        previousLevel,
+        currentLevel: updated.level,
+        currentExp: updated.exp,
+        leveledUp: updated.level > previousLevel,
+      };
+    });
   }
 }
