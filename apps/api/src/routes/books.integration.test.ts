@@ -1,44 +1,43 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  vi,
-} from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Hono } from 'hono';
 import type { Book, BattleLog } from '@tsundoku-dragon/shared';
 import books from './books';
 import {
   setupTestDB,
-  cleanupTestData,
   createTestEnv,
   resetClients,
   seedTestBooks,
 } from '../test-utils/dynamodb-helper';
 import { BookRepository } from '../repositories/bookRepository';
+import * as authModule from '../middleware/auth';
 
 // Firebase Auth のみモック（他は実際の実装を使用）
 vi.mock('../middleware/auth', () => ({
-  getAuthUserId: vi.fn(() => 'test-user'),
+  getAuthUserId: vi.fn(),
   authMiddleware: vi.fn(),
   getFirebaseToken: vi.fn(),
 }));
+
+/**
+ * テストファイル固有のプレフィックス
+ * 他のテストファイルと衝突しないようにする
+ */
+const TEST_FILE_PREFIX = 'routes';
 
 /**
  * ユニークIDを生成
  * テスト間の独立性を確保するため、各テストで一意のIDを使用
  */
 const createUniqueId = (prefix: string): string =>
-  `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  `${TEST_FILE_PREFIX}-${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
 /**
  * テスト用の本データを生成
+ * userIdはテストごとにユニークに生成
  */
-const createTestBook = (overrides?: Partial<Book>): Book => ({
+const createTestBook = (userId: string, overrides?: Partial<Book>): Book => ({
   id: createUniqueId('book'),
-  userId: 'test-user',
+  userId,
   title: 'テスト本',
   totalPages: 100,
   currentPage: 0,
@@ -63,18 +62,14 @@ describe('Books Routes Integration', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
     resetClients();
-  });
-
-  beforeEach(async () => {
-    // 各テスト前にデータをクリーンアップ
-    await cleanupTestData();
   });
 
   describe('PUT /books/:id', () => {
     it('本を更新してDBに永続化される', async () => {
-      const book = createTestBook();
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId);
       await seedTestBooks([book]);
 
       const res = await app.request(
@@ -93,13 +88,16 @@ describe('Books Routes Integration', () => {
       expect(body.totalPages).toBe(200);
 
       // DBに永続化されたことを確認
-      const savedBook = await repository.findById('test-user', book.id);
+      const savedBook = await repository.findById(userId, book.id);
       expect(savedBook).not.toBeNull();
       expect(savedBook?.title).toBe('更新後のタイトル');
       expect(savedBook?.totalPages).toBe(200);
     });
 
     it('存在しない本は404を返す', async () => {
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+
       const res = await app.request(
         '/books/non-existent-id',
         {
@@ -116,7 +114,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('アーカイブ済みの本は400を返す', async () => {
-      const book = createTestBook({ status: 'archived' });
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId, { status: 'archived' });
       await seedTestBooks([book]);
 
       const res = await app.request(
@@ -137,7 +137,9 @@ describe('Books Routes Integration', () => {
 
   describe('DELETE /books/:id', () => {
     it('本をソフトデリート(archived)してDBに永続化される', async () => {
-      const book = createTestBook();
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId);
       await seedTestBooks([book]);
 
       const res = await app.request(
@@ -149,12 +151,15 @@ describe('Books Routes Integration', () => {
       expect(res.status).toBe(204);
 
       // DBでstatusがarchivedになっていることを確認
-      const savedBook = await repository.findById('test-user', book.id);
+      const savedBook = await repository.findById(userId, book.id);
       expect(savedBook).not.toBeNull();
       expect(savedBook?.status).toBe('archived');
     });
 
     it('存在しない本は404を返す', async () => {
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+
       const res = await app.request(
         '/books/non-existent-id',
         { method: 'DELETE' },
@@ -167,7 +172,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('既にアーカイブ済みの本は400を返す', async () => {
-      const book = createTestBook({ status: 'archived' });
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId, { status: 'archived' });
       await seedTestBooks([book]);
 
       const res = await app.request(
@@ -184,7 +191,9 @@ describe('Books Routes Integration', () => {
 
   describe('POST /books/:id/reset', () => {
     it('完了した本をリセットしてcurrentPage: 0とroundがインクリメントされる', async () => {
-      const book = createTestBook({
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId, {
         status: 'completed',
         currentPage: 100,
         round: 1,
@@ -204,7 +213,7 @@ describe('Books Routes Integration', () => {
       expect(body.status).toBe('reading');
 
       // DBに永続化されたことを確認
-      const savedBook = await repository.findById('test-user', book.id);
+      const savedBook = await repository.findById(userId, book.id);
       expect(savedBook).not.toBeNull();
       expect(savedBook?.currentPage).toBe(0);
       expect(savedBook?.round).toBe(2);
@@ -212,6 +221,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('存在しない本は404を返す', async () => {
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+
       const res = await app.request(
         '/books/non-existent-id/reset',
         { method: 'POST' },
@@ -224,7 +236,12 @@ describe('Books Routes Integration', () => {
     });
 
     it('戦闘中(reading)の本は400を返す', async () => {
-      const book = createTestBook({ status: 'reading', currentPage: 50 });
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId, {
+        status: 'reading',
+        currentPage: 50,
+      });
       await seedTestBooks([book]);
 
       const res = await app.request(
@@ -241,7 +258,9 @@ describe('Books Routes Integration', () => {
 
   describe('GET /books/:id/logs', () => {
     it('ログを正常に取得できる', async () => {
-      const book = createTestBook();
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId);
       await seedTestBooks([book]);
 
       // ログを投入
@@ -258,8 +277,8 @@ describe('Books Routes Integration', () => {
         pagesRead: 20,
         createdAt: now.toISOString(),
       };
-      await repository.saveLog('test-user', book.id, log1);
-      await repository.saveLog('test-user', book.id, log2);
+      await repository.saveLog(userId, book.id, log1);
+      await repository.saveLog(userId, book.id, log2);
 
       const res = await app.request(`/books/${book.id}/logs`, {}, testEnv);
 
@@ -275,7 +294,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('limitパラメータが動作する', async () => {
-      const book = createTestBook();
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId);
       await seedTestBooks([book]);
 
       // 複数のログを投入
@@ -287,7 +308,7 @@ describe('Books Routes Integration', () => {
           pagesRead: (i + 1) * 10,
           createdAt: new Date(now.getTime() + i * 1000).toISOString(),
         };
-        await repository.saveLog('test-user', book.id, log);
+        await repository.saveLog(userId, book.id, log);
       }
 
       const res = await app.request(
@@ -306,7 +327,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('cursor-basedページネーションが動作する', async () => {
-      const book = createTestBook();
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+      const book = createTestBook(userId);
       await seedTestBooks([book]);
 
       // 複数のログを投入
@@ -318,7 +341,7 @@ describe('Books Routes Integration', () => {
           pagesRead: (i + 1) * 10,
           createdAt: new Date(now.getTime() + i * 1000).toISOString(),
         };
-        await repository.saveLog('test-user', book.id, log);
+        await repository.saveLog(userId, book.id, log);
       }
 
       // 最初のページを取得
@@ -353,6 +376,9 @@ describe('Books Routes Integration', () => {
     });
 
     it('存在しない本は404を返す', async () => {
+      const userId = createUniqueId('user');
+      vi.mocked(authModule.getAuthUserId).mockReturnValue(userId);
+
       const res = await app.request('/books/non-existent-id/logs', {}, testEnv);
 
       expect(res.status).toBe(404);

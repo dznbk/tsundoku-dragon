@@ -3,7 +3,6 @@ import type { Book } from '@tsundoku-dragon/shared';
 import { BookRepository } from './bookRepository';
 import {
   setupTestDB,
-  cleanupTestData,
   createTestEnv,
   resetClients,
 } from '../test-utils/dynamodb-helper';
@@ -43,7 +42,6 @@ describe('BookRepository Integration', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
     resetClients();
   });
 

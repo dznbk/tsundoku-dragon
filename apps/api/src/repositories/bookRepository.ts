@@ -61,7 +61,13 @@ export class BookRepository {
         },
       })
     );
-    return (result.Items ?? []).map((item) => this.toBook(item));
+    // ログエントリ（SK に #LOG# を含む）を除外し、本のみを返す
+    return (result.Items ?? [])
+      .filter((item) => {
+        const sk = item['SK'] as string;
+        return !sk.includes('#LOG#');
+      })
+      .map((item) => this.toBook(item));
   }
 
   async findById(userId: string, bookId: string): Promise<Book | null> {

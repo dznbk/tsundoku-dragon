@@ -12,6 +12,7 @@ const mockFindByUserId = vi.fn();
 const mockFindById = vi.fn();
 const mockUpdate = vi.fn();
 const mockFindLogs = vi.fn();
+const mockSaveLog = vi.fn();
 
 vi.mock('../repositories/bookRepository', () => ({
   BookRepository: class {
@@ -20,6 +21,7 @@ vi.mock('../repositories/bookRepository', () => ({
     findById = mockFindById;
     update = mockUpdate;
     findLogs = mockFindLogs;
+    saveLog = mockSaveLog;
   },
 }));
 
@@ -444,6 +446,144 @@ describe('Books Routes', () => {
         limit: 10,
         cursor: 'abc',
       });
+    });
+  });
+
+  describe('POST /books/:id/logs', () => {
+    const mockReadingBook: Book = {
+      id: 'book-123',
+      userId: 'test-user',
+      title: 'テスト本',
+      totalPages: 100,
+      currentPage: 50,
+      status: 'reading',
+      skills: [],
+      round: 1,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('201とログ・本・討伐フラグを返す', async () => {
+      mockFindById.mockResolvedValueOnce(mockReadingBook);
+      const updatedBook = { ...mockReadingBook, currentPage: 80 };
+      mockUpdate.mockResolvedValueOnce(updatedBook);
+
+      const res = await app.request(
+        '/books/book-123/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pagesRead: 30, memo: 'テストメモ' }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(201);
+      const body = (await res.json()) as {
+        log: { pagesRead: number; memo?: string };
+        book: Book;
+        defeat: boolean;
+      };
+      expect(body.log.pagesRead).toBe(30);
+      expect(body.log.memo).toBe('テストメモ');
+      expect(body.book.currentPage).toBe(80);
+      expect(body.defeat).toBe(false);
+    });
+
+    it('討伐時のレスポンス', async () => {
+      mockFindById.mockResolvedValueOnce(mockReadingBook);
+      const completedBook = {
+        ...mockReadingBook,
+        currentPage: 100,
+        status: 'completed',
+      };
+      mockUpdate.mockResolvedValueOnce(completedBook);
+
+      const res = await app.request(
+        '/books/book-123/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pagesRead: 50 }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(201);
+      const body = (await res.json()) as {
+        log: { pagesRead: number };
+        book: Book;
+        defeat: boolean;
+      };
+      expect(body.defeat).toBe(true);
+      expect(body.book.status).toBe('completed');
+    });
+
+    it('存在しない本は404を返す', async () => {
+      mockFindById.mockResolvedValueOnce(null);
+
+      const res = await app.request(
+        '/books/not-exist/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pagesRead: 30 }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(404);
+      const body = (await res.json()) as { error: string };
+      expect(body.error).toBe('Book not found');
+    });
+
+    it('reading以外のstatusは400を返す', async () => {
+      mockFindById.mockResolvedValueOnce({
+        ...mockReadingBook,
+        status: 'completed',
+      });
+
+      const res = await app.request(
+        '/books/book-123/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pagesRead: 30 }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as { error: string };
+      expect(body.error).toBe('Book is not in reading status');
+    });
+
+    it('pagesReadが0以下は400を返す', async () => {
+      const res = await app.request(
+        '/books/book-123/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pagesRead: 0 }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(400);
+    });
+
+    it('pagesReadがない場合は400を返す', async () => {
+      const res = await app.request(
+        '/books/book-123/logs',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ memo: 'テストメモ' }),
+        },
+        mockEnv
+      );
+
+      expect(res.status).toBe(400);
     });
   });
 });
