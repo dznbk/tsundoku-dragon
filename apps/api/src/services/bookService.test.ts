@@ -27,12 +27,16 @@ vi.mock('../repositories/bookRepository', () => ({
 const mockFindGlobalSkills = vi.fn();
 const mockFindUserCustomSkills = vi.fn();
 const mockSaveUserCustomSkill = vi.fn();
+const mockFindUserSkillExp = vi.fn();
+const mockUpsertUserSkillExp = vi.fn();
 
 vi.mock('../repositories/skillRepository', () => ({
   SkillRepository: class {
     findGlobalSkills = mockFindGlobalSkills;
     findUserCustomSkills = mockFindUserCustomSkills;
     saveUserCustomSkill = mockSaveUserCustomSkill;
+    findUserSkillExp = mockFindUserSkillExp;
+    upsertUserSkillExp = mockUpsertUserSkillExp;
   },
 }));
 
@@ -513,6 +517,18 @@ describe('BookService', () => {
       updatedAt: '2024-01-01T00:00:00Z',
     };
 
+    beforeEach(() => {
+      // デフォルトの経験値モック設定
+      mockFindUserSkillExp.mockResolvedValue(null);
+      mockUpsertUserSkillExp.mockImplementation(
+        async (_userId: string, skillName: string, expToAdd: number) => ({
+          name: skillName,
+          exp: expToAdd,
+          level: expToAdd >= 50 ? 2 : 1,
+        })
+      );
+    });
+
     it('ログを記録してcurrentPageを更新する', async () => {
       mockFindById.mockResolvedValueOnce(mockReadingBook);
       const updatedBook = { ...mockReadingBook, currentPage: 80 };
@@ -615,6 +631,137 @@ describe('BookService', () => {
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
       ).rejects.toThrow('Book is not in reading status');
+    });
+
+    describe('経験値システム', () => {
+      it('経験値が各スキルに付与される', async () => {
+        mockFindById.mockResolvedValueOnce(mockReadingBook);
+        const updatedBook = { ...mockReadingBook, currentPage: 80 };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 30,
+        });
+
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'TypeScript',
+          30
+        );
+        expect(result?.expGained).toBe(30);
+        expect(result?.defeatBonus).toBe(0);
+        expect(result?.skillResults).toHaveLength(1);
+        expect(result?.skillResults[0].skillName).toBe('TypeScript');
+        expect(result?.skillResults[0].expGained).toBe(30);
+      });
+
+      it('討伐時にボーナスが加算される', async () => {
+        mockFindById.mockResolvedValueOnce(mockReadingBook);
+        const completedBook = {
+          ...mockReadingBook,
+          currentPage: 100,
+          status: 'completed',
+        };
+        mockUpdate.mockResolvedValueOnce(completedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 50,
+        });
+
+        // 50ページ読了 + 討伐ボーナス(100 * 0.1 = 10) = 60
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'TypeScript',
+          60
+        );
+        expect(result?.expGained).toBe(60);
+        expect(result?.defeatBonus).toBe(10);
+      });
+
+      it('レベルアップが正しく検出される', async () => {
+        // 既存の経験値: 40（レベル1）
+        mockFindUserSkillExp.mockResolvedValueOnce({
+          name: 'TypeScript',
+          exp: 40,
+          level: 1,
+        });
+        // 更新後: 70exp（レベル2）
+        mockUpsertUserSkillExp.mockResolvedValueOnce({
+          name: 'TypeScript',
+          exp: 70,
+          level: 2,
+        });
+
+        mockFindById.mockResolvedValueOnce(mockReadingBook);
+        const updatedBook = { ...mockReadingBook, currentPage: 80 };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 30,
+        });
+
+        expect(result?.skillResults[0].previousLevel).toBe(1);
+        expect(result?.skillResults[0].currentLevel).toBe(2);
+        expect(result?.skillResults[0].leveledUp).toBe(true);
+      });
+
+      it('複数スキルが同時にレベルアップする場合', async () => {
+        const multiSkillBook: Book = {
+          ...mockReadingBook,
+          skills: ['TypeScript', 'React'],
+        };
+        mockFindById.mockResolvedValueOnce(multiSkillBook);
+        const updatedBook = { ...multiSkillBook, currentPage: 80 };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        // 両方のスキルが新規（経験値0、レベル1から開始）
+        mockFindUserSkillExp.mockResolvedValue(null);
+        mockUpsertUserSkillExp.mockImplementation(
+          async (_userId: string, skillName: string, expToAdd: number) => ({
+            name: skillName,
+            exp: expToAdd,
+            level: expToAdd >= 50 ? 2 : 1,
+          })
+        );
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 60,
+        });
+
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledTimes(2);
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'TypeScript',
+          60
+        );
+        expect(mockUpsertUserSkillExp).toHaveBeenCalledWith(
+          'user-123',
+          'React',
+          60
+        );
+        expect(result?.skillResults).toHaveLength(2);
+        expect(result?.skillResults[0].leveledUp).toBe(true);
+        expect(result?.skillResults[1].leveledUp).toBe(true);
+      });
+
+      it('スキルがない本の場合は経験値更新をスキップ', async () => {
+        const noSkillBook: Book = {
+          ...mockReadingBook,
+          skills: [],
+        };
+        mockFindById.mockResolvedValueOnce(noSkillBook);
+        const updatedBook = { ...noSkillBook, currentPage: 80 };
+        mockUpdate.mockResolvedValueOnce(updatedBook);
+
+        const result = await service.recordBattle('user-123', 'book-123', {
+          pagesRead: 30,
+        });
+
+        expect(mockFindUserSkillExp).not.toHaveBeenCalled();
+        expect(mockUpsertUserSkillExp).not.toHaveBeenCalled();
+        expect(result?.expGained).toBe(30);
+        expect(result?.skillResults).toEqual([]);
+      });
     });
   });
 });

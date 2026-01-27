@@ -11,11 +11,24 @@ import type {
   CreateBattleLogInput,
 } from '../types/api';
 import type { Env } from '../lib/dynamodb';
+import { defeatBonus as calcDefeatBonus } from '../lib/expCalculator';
+
+export interface SkillResult {
+  skillName: string;
+  expGained: number;
+  previousLevel: number;
+  currentLevel: number;
+  currentExp: number;
+  leveledUp: boolean;
+}
 
 export interface RecordBattleResult {
   log: BattleLog;
   book: Book;
   defeat: boolean;
+  expGained: number;
+  defeatBonus: number;
+  skillResults: SkillResult[];
 }
 
 export class BookService {
@@ -208,10 +221,65 @@ export class BookService {
       updatedAt: now,
     });
 
+    // 経験値計算
+    const baseExp = actualPagesRead;
+    const defeatBonusValue = defeat ? calcDefeatBonus(book.totalPages) : 0;
+    const totalExpGained = baseExp + defeatBonusValue;
+
+    // 各スキルの経験値更新（並列処理）
+    const skillResults = await this.updateSkillsExp(
+      userId,
+      book.skills,
+      totalExpGained
+    );
+
     return {
       log,
       book: updatedBook!,
       defeat,
+      expGained: totalExpGained,
+      defeatBonus: defeatBonusValue,
+      skillResults,
     };
+  }
+
+  private async updateSkillsExp(
+    userId: string,
+    skills: string[],
+    expToAdd: number
+  ): Promise<SkillResult[]> {
+    if (skills.length === 0 || expToAdd === 0) {
+      return [];
+    }
+
+    // 各スキルの現在の経験値を取得（並列）
+    const previousExps = await Promise.all(
+      skills.map((skillName) =>
+        this.skillRepository.findUserSkillExp(userId, skillName)
+      )
+    );
+
+    // 各スキルの経験値を更新（並列）
+    const updatedExps = await Promise.all(
+      skills.map((skillName) =>
+        this.skillRepository.upsertUserSkillExp(userId, skillName, expToAdd)
+      )
+    );
+
+    // SkillResult を構築
+    return skills.map((skillName, index) => {
+      const previous = previousExps[index];
+      const updated = updatedExps[index];
+      const previousLevel = previous?.level ?? 1;
+
+      return {
+        skillName,
+        expGained: expToAdd,
+        previousLevel,
+        currentLevel: updated.level,
+        currentExp: updated.exp,
+        leveledUp: updated.level > previousLevel,
+      };
+    });
   }
 }
