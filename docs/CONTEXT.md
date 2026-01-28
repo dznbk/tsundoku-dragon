@@ -89,11 +89,9 @@
 
 ### 次にやること
 
-1. 戦闘画面・戦闘ログ記録API
-   - 読書進捗の記録（`POST /books/:id/logs`）
+1. 戦闘画面（フロントエンド）
    - ドラクエ風演出（攻撃メッセージ、HPバー減少アニメーション）
    - 討伐時の経験値表示、レベルアップ通知
-   - 経験値計算（1ページ=1exp、討伐ボーナス10%）
 2. スキル一覧画面
    - スキルレベル・経験値バー表示
    - ソート機能（レベル順、名前順、最近更新順）
@@ -160,6 +158,79 @@
 ---
 
 ## 議論ログ
+
+### 2026-01-28 経験値計算・スキル更新ロジック実装
+
+**実施した内容：**
+
+- 戦闘ログ記録時（`POST /books/:id/logs`）の経験値計算と各スキルへの付与
+- 経験値計算のユーティリティ関数（純粋関数）
+- スキル経験値のUpsert処理（並列処理）
+- レスポンス拡張（expGained, defeatBonus, skillResults）
+
+**作成・修正したファイル：**
+
+| ファイル                                                                | 内容                                     |
+| ----------------------------------------------------------------------- | ---------------------------------------- |
+| `apps/api/src/lib/expCalculator.ts`（新規）                             | 経験値計算ユーティリティ                 |
+| `apps/api/src/lib/expCalculator.test.ts`（新規）                        | 経験値計算テスト（15件）                 |
+| `apps/api/src/repositories/skillRepository.ts`                          | findUserSkillExp, upsertUserSkillExp追加 |
+| `apps/api/src/repositories/skillRepository.test.ts`                     | 新メソッドのユニットテスト追加           |
+| `apps/api/src/repositories/skillRepository.integration.test.ts`（新規） | 統合テスト（7件）                        |
+| `apps/api/src/services/bookService.ts`                                  | recordBattle拡張、updateSkillsExp追加    |
+| `apps/api/src/services/bookService.test.ts`                             | 経験値関連テスト追加                     |
+
+**経験値計算式:**
+
+```typescript
+// レベルに必要な経験値
+expForLevel(level) = floor(level^1.5 × 50)
+
+// 累積経験値からレベルを計算
+levelFromExp(totalExp) // レベル上限: 9999
+
+// 討伐ボーナス（総ページ数の10%）
+defeatBonus(totalPages) = floor(totalPages × 0.1)
+```
+
+**RecordBattleResultの拡張：**
+
+```typescript
+interface RecordBattleResult {
+  log: BattleLog;
+  book: Book;
+  defeat: boolean;
+  expGained: number; // 追加: 獲得経験値（基本+ボーナス）
+  defeatBonus: number; // 追加: 討伐ボーナス（0 or ボーナス値）
+  skillResults: SkillResult[]; // 追加: 各スキルの結果
+}
+
+interface SkillResult {
+  skillName: string;
+  expGained: number;
+  previousLevel: number;
+  currentLevel: number;
+  currentExp: number;
+  leveledUp: boolean;
+}
+```
+
+**技術的な決定：**
+
+| 決定                          | 理由                                            |
+| ----------------------------- | ----------------------------------------------- |
+| 純粋関数でexpCalculator実装   | テストしやすい、副作用なし                      |
+| Promise.allで並列処理         | 複数スキルの経験値更新を効率化                  |
+| PutCommandでUpsert            | DynamoDBのネイティブ操作、UpdateCommandより簡潔 |
+| 経験値計算はBookServiceに集約 | ビジネスロジックはService層に集約する設計方針   |
+
+**学び：**
+
+- 境界値テスト（レベル1の49exp、レベル2の50exp）は必須
+- 並列処理で各スキルの経験値更新を行う際、previousExpの取得も並列化可能
+- 累乗式のレベル計算では、上限チェックを忘れずに
+
+---
 
 ### 2026-01-18 本の詳細画面 - 詳細設計
 
