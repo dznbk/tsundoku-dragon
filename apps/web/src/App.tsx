@@ -6,9 +6,10 @@ import LoginPage from './pages/LoginPage';
 import { BookRegisterPage } from './pages/BookRegisterPage';
 import { HomePage } from './pages/HomePage';
 import { BookDetailPage } from './pages/BookDetailPage';
+import { BattlePage } from './pages/BattlePage';
 import styles from './App.module.css';
 
-type Page = 'home' | 'book-register' | 'book-detail';
+type Page = 'home' | 'book-register' | 'book-detail' | 'battle';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
@@ -35,6 +36,21 @@ function AppContent() {
     return <BookRegisterPage onBack={() => setCurrentPage('home')} />;
   }
 
+  if (currentPage === 'battle' && selectedBookId) {
+    return (
+      <BattlePage
+        bookId={selectedBookId}
+        onBack={() => {
+          setCurrentPage('book-detail');
+        }}
+        onDefeat={() => {
+          setCurrentPage('home');
+          setSelectedBookId(null);
+        }}
+      />
+    );
+  }
+
   if (currentPage === 'book-detail' && selectedBookId) {
     return (
       <BookDetailPage
@@ -44,8 +60,8 @@ function AppContent() {
           setSelectedBookId(null);
         }}
         onNavigateToBattle={(bookId) => {
-          // TODO: 戦闘画面への遷移（別Issue）
-          console.log('Navigate to battle:', bookId);
+          setSelectedBookId(bookId);
+          setCurrentPage('battle');
         }}
       />
     );

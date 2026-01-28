@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: var(--color-hp);
+  min-width: 24px;
+}
+
+.barBackground {
+  flex: 1;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  border: 2px solid var(--color-border);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    #f5b041 0%,
+    var(--color-hp) 50%,
+    #d68910 100%
+  );
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.text {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  min-width: 80px;
+  text-align: right;
+  font-family: var(--font-pixel);
+}
