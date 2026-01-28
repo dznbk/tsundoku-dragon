@@ -86,12 +86,14 @@
 - ホーム画面（本一覧）（BookGrid、BookCard、ProgressBar、UserStatus、CompletedToggle、BottomActionBar）
 - ステージング環境構築（Cloudflare Workers、GitHub Actions CD、カスタムドメイン、Cloudflare Access）
 - 本の詳細画面（BookDetailPage、BookInfo、BattleLogList、BookEditModal、編集/削除/再戦API）
+- 戦闘画面UI基本（BattlePage、EnemyDisplay、HpBar、BattleInput、useBattle）
 
 ### 次にやること
 
-1. 戦闘画面（フロントエンド）
+1. 戦闘演出（#58）
    - ドラクエ風演出（攻撃メッセージ、HPバー減少アニメーション）
    - 討伐時の経験値表示、レベルアップ通知
+   - 書影→ドラゴン変化アニメーション
 2. スキル一覧画面
    - スキルレベル・経験値バー表示
    - ソート機能（レベル順、名前順、最近更新順）
