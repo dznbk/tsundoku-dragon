@@ -180,4 +180,111 @@ describe('SkillRepository', () => {
       vi.useRealTimers();
     });
   });
+
+  describe('findUserSkillExp', () => {
+    it('存在するスキル経験値を取得する', async () => {
+      mockSend.mockResolvedValueOnce({
+        Item: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+          exp: 100,
+          level: 2,
+        },
+      });
+
+      const result = await repository.findUserSkillExp(
+        'user-123',
+        'TypeScript'
+      );
+
+      expect(mockSend).toHaveBeenCalledOnce();
+      expect(result).toEqual({
+        name: 'TypeScript',
+        exp: 100,
+        level: 2,
+      });
+    });
+
+    it('存在しないスキル経験値はnullを返す', async () => {
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await repository.findUserSkillExp(
+        'user-123',
+        '存在しないスキル'
+      );
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('upsertUserSkillExp', () => {
+    it('新規スキル経験値を作成する', async () => {
+      // findUserSkillExp のレスポンス（存在しない）
+      mockSend.mockResolvedValueOnce({});
+      // PutCommand のレスポンス
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await repository.upsertUserSkillExp(
+        'user-123',
+        'TypeScript',
+        50
+      );
+
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      // PutCommand の呼び出しを確認
+      const putCommand = mockSend.mock.calls[1][0];
+      expect(putCommand.input).toEqual({
+        TableName: 'test-table',
+        Item: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+          exp: 50,
+          level: 2, // 50expでレベル2
+        },
+      });
+      expect(result).toEqual({
+        name: 'TypeScript',
+        exp: 50,
+        level: 2,
+      });
+    });
+
+    it('既存スキル経験値を更新する', async () => {
+      // findUserSkillExp のレスポンス（既存）
+      mockSend.mockResolvedValueOnce({
+        Item: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+          exp: 40,
+          level: 1,
+        },
+      });
+      // PutCommand のレスポンス
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await repository.upsertUserSkillExp(
+        'user-123',
+        'TypeScript',
+        20
+      );
+
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      // PutCommand の呼び出しを確認
+      const putCommand = mockSend.mock.calls[1][0];
+      expect(putCommand.input).toEqual({
+        TableName: 'test-table',
+        Item: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+          exp: 60, // 40 + 20
+          level: 2, // 60expでレベル2
+        },
+      });
+      expect(result).toEqual({
+        name: 'TypeScript',
+        exp: 60,
+        level: 2,
+      });
+    });
+  });
 });
