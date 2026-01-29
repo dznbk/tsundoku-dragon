@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import { HpBar } from './HpBar';
 
 describe('HpBar', () => {
@@ -38,5 +38,47 @@ describe('HpBar', () => {
     // current=25、残りは75。バーは残りの割合なので75%になる
     // ただし実装上はcurrent/maxの割合なので25%
     expect(progressbar).toHaveStyle({ width: '25%' });
+  });
+
+  describe('アニメーション', () => {
+    it('animateTo に向かってアニメーションする', async () => {
+      render(
+        <HpBar current={0} max={100} animateTo={50} animationDuration={50} />
+      );
+
+      // 初期状態
+      expect(screen.getByText('100/100')).toBeInTheDocument();
+
+      // アニメーション完了後（waitForで待機）
+      await waitFor(
+        () => {
+          expect(screen.getByText('50/100')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('アニメーション完了後に onAnimationComplete が呼ばれる', async () => {
+      const onAnimationComplete = vi.fn();
+      render(
+        <HpBar
+          current={0}
+          max={100}
+          animateTo={50}
+          animationDuration={50}
+          onAnimationComplete={onAnimationComplete}
+        />
+      );
+
+      expect(onAnimationComplete).not.toHaveBeenCalled();
+
+      // アニメーション完了まで待機
+      await waitFor(
+        () => {
+          expect(onAnimationComplete).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 500 }
+      );
+    });
   });
 });

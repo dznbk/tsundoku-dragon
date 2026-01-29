@@ -14,3 +14,5 @@ export { BookEditModal } from './BookEditModal';
 export { HpBar } from './HpBar';
 export { EnemyDisplay } from './EnemyDisplay';
 export { BattleInput } from './BattleInput';
+export { BattleMessage } from './BattleMessage';
+export { BattleTransition } from './BattleTransition';

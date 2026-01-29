@@ -7,6 +7,8 @@ interface EnemyDisplayProps {
   currentHp: number;
   maxHp: number;
   rank: DragonRank;
+  animateTo?: number;
+  onAnimationComplete?: () => void;
 }
 
 export function EnemyDisplay({
@@ -14,6 +16,8 @@ export function EnemyDisplay({
   currentHp,
   maxHp,
   rank,
+  animateTo,
+  onAnimationComplete,
 }: EnemyDisplayProps) {
   const dragonColor = getDragonColor(rank);
 
@@ -31,7 +35,12 @@ export function EnemyDisplay({
       </div>
       <h2 className={styles.title}>{title}</h2>
       <div className={styles.hpContainer}>
-        <HpBar current={currentHp} max={maxHp} />
+        <HpBar
+          current={currentHp}
+          max={maxHp}
+          animateTo={animateTo}
+          onAnimationComplete={onAnimationComplete}
+        />
       </div>
     </div>
   );
