@@ -26,6 +26,29 @@ export interface BattleLogsResponse {
   nextCursor?: string;
 }
 
+export interface RecordBattleInput {
+  pagesRead: number;
+  memo?: string;
+}
+
+export interface SkillResult {
+  skillName: string;
+  expGained: number;
+  previousLevel: number;
+  currentLevel: number;
+  currentExp: number;
+  leveledUp: boolean;
+}
+
+export interface RecordBattleResult {
+  log: BattleLog;
+  book: Book;
+  defeat: boolean;
+  expGained: number;
+  defeatBonus: number;
+  skillResults: SkillResult[];
+}
+
 export interface Book {
   id: string;
   userId: string;
@@ -192,6 +215,30 @@ export async function getBookLogs(
 
   if (!response.ok) {
     throw new ApiError('Failed to fetch book logs', response.status);
+  }
+
+  return response.json();
+}
+
+export async function recordBattle(
+  user: User,
+  bookId: string,
+  input: RecordBattleInput
+): Promise<RecordBattleResult> {
+  const token = await user.getIdToken();
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+
+  const response = await fetch(`${apiUrl}/books/${bookId}/logs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new ApiError('Failed to record battle', response.status);
   }
 
   return response.json();
