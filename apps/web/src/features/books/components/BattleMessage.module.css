@@ -1,0 +1,32 @@
+.messageWindow {
+  width: 100%;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  font-family: var(--font-pixel);
+  font-size: 1.125rem;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.cursor {
+  animation: blink 0.5s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
