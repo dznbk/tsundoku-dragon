@@ -16,3 +16,5 @@ export { EnemyDisplay } from './EnemyDisplay';
 export { BattleInput } from './BattleInput';
 export { BattleMessage } from './BattleMessage';
 export { BattleTransition } from './BattleTransition';
+export { VictoryScreen } from './VictoryScreen';
+export type { SkillResult } from './VictoryScreen';

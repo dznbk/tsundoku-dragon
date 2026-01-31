@@ -5,8 +5,10 @@ import { EnemyDisplay } from '../features/books/components/EnemyDisplay';
 import { BattleInput } from '../features/books/components/BattleInput';
 import { BattleTransition } from '../features/books/components/BattleTransition';
 import { BattleMessage } from '../features/books/components/BattleMessage';
+import { VictoryScreen } from '../features/books/components/VictoryScreen';
 import { getDragonRank } from '../features/books/utils/dragonRank';
 import { DQWindow } from '../components/DQWindow';
+import type { RecordBattleResult } from '../features/books/services/bookApi';
 import styles from './BattlePage.module.css';
 
 type BattleState =
@@ -42,6 +44,9 @@ export function BattlePage({ bookId, onBack, onDefeat }: BattlePageProps) {
 
   const [battleState, setBattleState] = useState<BattleState>('transition');
   const [attackResult, setAttackResult] = useState<AttackResult | null>(null);
+  const [battleResult, setBattleResult] = useState<RecordBattleResult | null>(
+    null
+  );
   const [displayCurrentPage, setDisplayCurrentPage] = useState<number | null>(
     null
   );
@@ -59,6 +64,9 @@ export function BattlePage({ bookId, onBack, onDefeat }: BattlePageProps) {
         newCurrentPage,
         isDefeat: result.defeat,
       });
+      if (result.defeat) {
+        setBattleResult(result);
+      }
       setBattleState('attacking');
     }
   };
@@ -70,14 +78,13 @@ export function BattlePage({ bookId, onBack, onDefeat }: BattlePageProps) {
   const handleAnimationComplete = useCallback(async () => {
     if (attackResult?.isDefeat) {
       setBattleState('victory');
-      onDefeat();
     } else {
       setDisplayCurrentPage(null);
       setAttackResult(null);
       await refetch();
       setBattleState('idle');
     }
-  }, [attackResult, onDefeat, refetch]);
+  }, [attackResult, refetch]);
 
   if (isLoading) {
     return (
@@ -121,6 +128,26 @@ export function BattlePage({ bookId, onBack, onDefeat }: BattlePageProps) {
           rank={rank}
           onComplete={handleTransitionComplete}
         />
+      </div>
+    );
+  }
+
+  // 討伐演出状態
+  if (battleState === 'victory' && battleResult) {
+    return (
+      <div className={styles.page}>
+        <DQWindow className={styles.header}>
+          <h1 className={styles.title}>討伐完了</h1>
+        </DQWindow>
+        <main className={styles.main}>
+          <VictoryScreen
+            bookTitle={book.title}
+            expGained={battleResult.expGained}
+            defeatBonus={battleResult.defeatBonus}
+            skillResults={battleResult.skillResults}
+            onGoHome={onDefeat}
+          />
+        </main>
       </div>
     );
   }
