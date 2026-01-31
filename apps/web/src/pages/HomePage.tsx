@@ -15,10 +15,15 @@ import styles from './HomePage.module.css';
 
 interface HomePageProps {
   onNavigateToRegister: () => void;
+  onNavigateToSkillList: () => void;
   onBookClick: (bookId: string) => void;
 }
 
-export function HomePage({ onNavigateToRegister, onBookClick }: HomePageProps) {
+export function HomePage({
+  onNavigateToRegister,
+  onNavigateToSkillList,
+  onBookClick,
+}: HomePageProps) {
   const { isLoading } = useBooks();
   const { userName, completedCount, totalPagesRead, topSkills } =
     useUserStatus();
@@ -34,6 +39,7 @@ export function HomePage({ onNavigateToRegister, onBookClick }: HomePageProps) {
             completedCount={completedCount}
             totalPagesRead={totalPagesRead}
             topSkills={topSkills}
+            onSkillListClick={onNavigateToSkillList}
           />
         </DQWindow>
       </section>
