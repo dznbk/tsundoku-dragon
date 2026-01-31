@@ -1,0 +1,38 @@
+.card {
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-window-light) 0%,
+    var(--color-bg-window-dark) 100%
+  );
+  border: 3px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.level {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-exp);
+  font-family: var(--font-pixel);
+}
+
+.totalExp {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: right;
+}

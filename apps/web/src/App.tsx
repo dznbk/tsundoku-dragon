@@ -7,9 +7,10 @@ import { BookRegisterPage } from './pages/BookRegisterPage';
 import { HomePage } from './pages/HomePage';
 import { BookDetailPage } from './pages/BookDetailPage';
 import { BattlePage } from './pages/BattlePage';
+import { SkillListPage } from './pages/SkillListPage';
 import styles from './App.module.css';
 
-type Page = 'home' | 'book-register' | 'book-detail' | 'battle';
+type Page = 'home' | 'book-register' | 'book-detail' | 'battle' | 'skill-list';
 
 function AppContent() {
   const { user, loading, signOut } = useAuth();
@@ -34,6 +35,10 @@ function AppContent() {
 
   if (currentPage === 'book-register') {
     return <BookRegisterPage onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'skill-list') {
+    return <SkillListPage onBack={() => setCurrentPage('home')} />;
   }
 
   if (currentPage === 'battle' && selectedBookId) {
@@ -98,6 +103,7 @@ function AppContent() {
       <main className={styles.main}>
         <HomePage
           onNavigateToRegister={() => setCurrentPage('book-register')}
+          onNavigateToSkillList={() => setCurrentPage('skill-list')}
           onBookClick={handleBookClick}
         />
       </main>

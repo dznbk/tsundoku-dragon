@@ -45,9 +45,28 @@
   gap: 8px;
 }
 
+.skillsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .skillsLabel {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+.skillListLink {
+  background: none;
+  border: none;
+  color: var(--color-exp);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.skillListLink:hover {
+  text-decoration: underline;
 }
 
 .skillsList {
@@ -64,4 +83,9 @@
   border-radius: 4px;
   font-size: 0.75rem;
   color: var(--color-exp);
+}
+
+.noSkills {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }

@@ -6,6 +6,7 @@ interface UserStatusProps {
   completedCount: number;
   totalPagesRead: number;
   topSkills: UserSkillExp[];
+  onSkillListClick?: () => void;
 }
 
 export function UserStatus({
@@ -13,6 +14,7 @@ export function UserStatus({
   completedCount,
   totalPagesRead,
   topSkills,
+  onSkillListClick,
 }: UserStatusProps) {
   return (
     <div className={styles.container}>
@@ -34,9 +36,20 @@ export function UserStatus({
         </div>
       </div>
 
-      {topSkills.length > 0 && (
-        <div className={styles.skills}>
+      <div className={styles.skills}>
+        <div className={styles.skillsHeader}>
           <span className={styles.skillsLabel}>上位スキル</span>
+          {onSkillListClick && (
+            <button
+              type="button"
+              onClick={onSkillListClick}
+              className={styles.skillListLink}
+            >
+              一覧を見る →
+            </button>
+          )}
+        </div>
+        {topSkills.length > 0 ? (
           <div className={styles.skillsList}>
             {topSkills.map((skill) => (
               <span key={skill.name} className={styles.skillTag}>
@@ -44,8 +57,10 @@ export function UserStatus({
               </span>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <span className={styles.noSkills}>まだスキルがありません</span>
+        )}
+      </div>
     </div>
   );
 }
