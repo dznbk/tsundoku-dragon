@@ -87,17 +87,13 @@
 - ステージング環境構築（Cloudflare Workers、GitHub Actions CD、カスタムドメイン、Cloudflare Access）
 - 本の詳細画面（BookDetailPage、BookInfo、BattleLogList、BookEditModal、編集/削除/再戦API）
 - 戦闘画面UI基本（BattlePage、EnemyDisplay、HpBar、BattleInput、useBattle）
+- 戦闘演出（#58）（BattleMessage、HPバー減少アニメーション、攻撃メッセージ）
+- 討伐演出・レベルアップ表示（#59）（DefeatOverlay、LevelUpNotification、経験値獲得表示）
+- スキル一覧画面（#60）（SkillListPage、SkillCard、ExpBar、ソート機能）
 
 ### 次にやること
 
-1. 戦闘演出（#58）
-   - ドラクエ風演出（攻撃メッセージ、HPバー減少アニメーション）
-   - 討伐時の経験値表示、レベルアップ通知
-   - 書影→ドラゴン変化アニメーション
-2. スキル一覧画面
-   - スキルレベル・経験値バー表示
-   - ソート機能（レベル順、名前順、最近更新順）
-3. 本番環境の構築
+1. 本番環境の構築
    - 計画: [planning/deployment-plan.md](../planning/deployment-plan.md)
 
 ### スキップ
