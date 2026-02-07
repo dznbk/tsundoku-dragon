@@ -166,6 +166,15 @@
 - [ ] **Pages カスタムドメイン設定**
   - 本番: tsundoku.deepon.dev
 
+#### 追加-P: アクセス制限（一時的）
+
+- [ ] **Cloudflare Access 設定**
+  - Application: `tsundoku-dragon-production`
+  - 対象ホスト: `tsundoku.deepon.dev`（Web のみ、API は除外）
+  - 認証方式: One-time PIN（メール認証）
+  - ポリシー: 指定メールアドレスのみ許可
+  - ※動作確認完了後に解除
+
 #### Phase 6-P: 検証
 
 - [ ] **production 環境デプロイ & 動作確認**

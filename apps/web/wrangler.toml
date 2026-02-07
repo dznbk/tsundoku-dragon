@@ -11,7 +11,7 @@ directory = "./dist"
 name = "tsundoku-dragon-staging"
 
 # ============================================================
-# Production 環境（後で設定）
+# Production 環境
 # ============================================================
-# [env.production]
-# name = "tsundoku-dragon"
+[env.production]
+name = "tsundoku-dragon"

@@ -33,15 +33,18 @@ binding = "PUBLIC_JWK_CACHE_KV"
 id = "486c84b66f0842e798c973b5ea081976"
 
 # ============================================================
-# Production 環境（後で設定）
+# Production 環境
 # ============================================================
-# [env.production]
-# name = "tsundoku-dragon-api"
-#
-# [env.production.vars]
-# DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
-# ALLOWED_ORIGINS = "https://tsundoku.deepon.dev"
-#
-# [[env.production.kv_namespaces]]
-# binding = "PUBLIC_JWK_CACHE_KV"
-# id = "REPLACE_ME_WITH_PRODUCTION_KV_ID"
+[env.production]
+name = "tsundoku-dragon-api"
+
+[env.production.vars]
+AWS_REGION = "ap-northeast-1"
+FIREBASE_PROJECT_ID = "tsundoku-dragon"
+PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
+DYNAMODB_TABLE_NAME = "tsundoku-dragon-prod"
+ALLOWED_ORIGINS = "https://tsundoku.deepon.dev"
+
+[[env.production.kv_namespaces]]
+binding = "PUBLIC_JWK_CACHE_KV"
+id = "1f79768d91be42e586b4c7d3a186e94e"
