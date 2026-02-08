@@ -90,11 +90,11 @@
 - 戦闘演出（#58）（BattleMessage、HPバー減少アニメーション、攻撃メッセージ）
 - 討伐演出・レベルアップ表示（#59）（DefeatOverlay、LevelUpNotification、経験値獲得表示）
 - スキル一覧画面（#60）（SkillListPage、SkillCard、ExpBar、ソート機能）
+- 本番環境構築（DynamoDB本番テーブル、Cloudflare Workers、GitHub Actions CD、release-drafter、カスタムドメイン）
 
 ### 次にやること
 
-1. 本番環境の構築
-   - 計画: [planning/deployment-plan.md](../planning/deployment-plan.md)
+（未定）
 
 ### スキップ
 
@@ -156,6 +156,52 @@
 ---
 
 ## 議論ログ
+
+### 2026-02-08 本番環境構築
+
+**実施した内容：**
+
+- 本番環境のインフラ構築（DynamoDB、Cloudflare Workers、KV Namespace）
+- GitHub Actions ワークフロー整備（staging / production 分離）
+- release-drafter 導入（リリースノート自動生成）
+- カスタムドメイン設定（tsundoku.deepon.dev、api.tsundoku.deepon.dev）
+- Cloudflare Access による一時的なアクセス制限
+- Firebase API キー制限設定
+
+**作成・修正したファイル：**
+
+| ファイル                                  | 内容                           |
+| ----------------------------------------- | ------------------------------ |
+| `apps/api/wrangler.toml`                  | production 環境設定追加        |
+| `apps/web/wrangler.toml`                  | production 環境設定追加        |
+| `.github/workflows/deploy-staging.yml`    | staging デプロイ（既存を修正） |
+| `.github/workflows/deploy-production.yml` | production デプロイ（新規）    |
+| `.github/workflows/release-drafter.yml`   | リリースドラフト更新（新規）   |
+| `.github/release-drafter.yml`             | release-drafter 設定（新規）   |
+| `planning/deployment-plan.md`             | Cloudflare Access 設定項目追記 |
+
+**運用フロー：**
+
+| アクション               | 結果                                        |
+| ------------------------ | ------------------------------------------- |
+| main に push             | staging 自動デプロイ + リリースドラフト更新 |
+| release publish (vX.X.X) | production 自動デプロイ                     |
+
+**環境構成：**
+
+| レイヤー | staging                     | production              |
+| -------- | --------------------------- | ----------------------- |
+| Frontend | stg.tsundoku.deepon.dev     | tsundoku.deepon.dev     |
+| API      | api-stg.tsundoku.deepon.dev | api.tsundoku.deepon.dev |
+| DB       | tsundoku-dragon-staging     | tsundoku-dragon-prod    |
+
+**学び：**
+
+- Firebase Web API キーはクライアント公開前提だが、リファラー制限を設定すべき
+- `tsundoku-dragon.firebaseapp.com` もリファラー許可リストに追加が必要（Auth ポップアップ用）
+- release-drafter の設定ファイルは default branch に存在する必要がある
+
+---
 
 ### 2026-01-28 経験値計算・スキル更新ロジック実装
 
