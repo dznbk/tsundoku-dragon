@@ -91,6 +91,9 @@
 - 討伐演出・レベルアップ表示（#59）（DefeatOverlay、LevelUpNotification、経験値獲得表示）
 - スキル一覧画面（#60）（SkillListPage、SkillCard、ExpBar、ソート機能）
 - 本番環境構築（DynamoDB本番テーブル、Cloudflare Workers、GitHub Actions CD、release-drafter、カスタムドメイン）
+- Terraform 方針策定（プロビジョニングとデプロイの分離、環境ごとディレクトリ分離、ローカル State）
+- staging 環境の Terraform 化（DynamoDB、IAM、KV Namespace、Cloudflare Access の既存リソース import）
+- production 環境の Terraform 化（DynamoDB、KV Namespace、Cloudflare Access の既存リソース import。IAM は staging で一元管理）
 
 ### 次にやること
 

@@ -28,7 +28,7 @@
 ## 進捗
 
 - 開始: 2026-02-11
-- 完了: （未完了）
+- 完了: 2026-02-11
 
 ---
 
@@ -86,51 +86,45 @@
 
 ### 3-1: 事前情報収集
 
-- [ ] Cloudflare Access アプリケーション ID を確認（production）
-- [ ] Cloudflare Access ポリシー ID を確認（production）
+- [x] Cloudflare Access アプリケーション ID を確認（production） → terraform.tfvars に記入
+- [x] Cloudflare Access ポリシー ID を確認（production） → terraform.tfvars に記入
 
 ### 3-2: Terraform コード作成（production）
 
-- [ ] `terraform/production/main.tf` を作成
+- [x] `terraform/production/main.tf` を作成
   - プロバイダ設定（AWS + Cloudflare）
   - `aws_dynamodb_table.main`（tsundoku-dragon-prod）
   - `cloudflare_workers_kv_namespace.main`
   - `cloudflare_zero_trust_access_application.main`
   - `cloudflare_zero_trust_access_policy.main`
   - ※ IAM は管理対象外
-- [ ] `terraform/production/variables.tf` を作成
-- [ ] `terraform/production/outputs.tf` を作成
-- [ ] `terraform/production/terraform.tfvars.example` を作成（テンプレート）
-- [ ] `terraform/production/terraform.tfvars` を作成（実際の値を記入）
+- [x] `terraform/production/variables.tf` を作成
+- [x] `terraform/production/outputs.tf` を作成
+- [x] `terraform/production/terraform.tfvars.example` を作成（テンプレート）
+- [x] `terraform/production/terraform.tfvars` を作成（実際の値を記入）
 
 ### 3-3: 既存リソースの import（production）
 
-- [ ] `terraform init` を実行
-- [ ] DynamoDB テーブルを import
-  ```bash
-  terraform import aws_dynamodb_table.main tsundoku-dragon-prod
-  ```
-- [ ] KV Namespace を import
-  ```bash
-  terraform import cloudflare_workers_kv_namespace.main <account_id>/1f79768d91be42e586b4c7d3a186e94e
-  ```
-- [ ] Access Application を import
-- [ ] Access Policy を import
+- [x] `terraform init` を実行
+- [x] DynamoDB テーブルを import
+- [x] KV Namespace を import
+- [x] Access Application を import
+- [x] Access Policy を import
 
 ### 3-4: 差分確認と調整（production）
 
-- [ ] `terraform plan` を実行し、差分を確認
-- [ ] 差分がある場合、Terraform コードを既存リソースに合わせて調整
-- [ ] `terraform plan` で **No changes** になることを確認
+- [x] `terraform plan` を実行し、差分を確認
+- [x] 差分がある場合、Terraform コードを既存リソースに合わせて調整（DynamoDB キャパシティ 24、Access App 名 `tsundoku-dragon-production`）
+- [x] `terraform plan` で **No changes** になることを確認
 
 ## フェーズ4: 検証・仕上げ
 
-- [ ] staging で `terraform plan` を再実行し、No changes を確認
-- [ ] production で `terraform plan` を再実行し、No changes を確認
-- [ ] `terraform output` で出力値が wrangler.toml の値と一致することを確認
-- [ ] 既存のアプリケーション動作に影響がないことを確認（staging にアクセス）
-- [ ] Terraform 関連ファイルが `.gitignore` で正しく除外されていることを確認
-- [ ] コミット・プッシュ（`.tf` ファイルと `.tfvars.example` のみ。`.tfstate` / `terraform.tfvars` は除外）
+- [x] staging で `terraform plan` を再実行し、No changes を確認
+- [x] production で `terraform plan` を再実行し、No changes を確認
+- [x] `terraform output` で出力値が wrangler.toml の値と一致することを確認
+- [x] 既存のアプリケーション動作に影響がないことを確認（staging にアクセス）
+- [x] Terraform 関連ファイルが `.gitignore` で正しく除外されていることを確認
+- [x] コミット・プッシュ（`.tf` ファイルと `.tfvars.example` のみ。`.tfstate` / `terraform.tfvars` は除外） → PR #74
 
 ---
 
@@ -144,12 +138,14 @@
 
 ### うまくいったこと
 
--
+- staging の Terraform コードをベースに production をスムーズに作成できた
+- import → plan → 差分修正のサイクルが確立されていた
 
 ### 改善点
 
--
+- DynamoDB キャパシティや Access App 名など、実際の値を事前に確認してから tfvars を作成すべきだった（plan で初めて気づいた）
 
 ### 次回への学び
 
--
+- Cloudflare Access の v5 import 形式（`accounts/<account_id>/<app_id>`）を忘れずに
+- production の DynamoDB キャパシティは staging と異なる場合がある（24 vs 1）
