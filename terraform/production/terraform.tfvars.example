@@ -1,0 +1,15 @@
+# AWS
+aws_region              = "ap-northeast-1"
+dynamodb_table_name     = "tsundoku-dragon-prod"
+dynamodb_read_capacity  = 24
+dynamodb_write_capacity = 24
+
+# Cloudflare
+cloudflare_api_token   = "<CLOUDFLARE_API_TOKEN>"
+cloudflare_account_id  = "<CLOUDFLARE_ACCOUNT_ID>"
+kv_namespace_title     = "PUBLIC_JWK_CACHE_KV"
+
+# Cloudflare Access
+access_app_name        = "tsundoku-dragon-production"
+access_app_domain      = "tsundoku.deepon.dev"
+access_allowed_emails  = ["your-email@example.com"]

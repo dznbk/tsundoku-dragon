@@ -86,42 +86,36 @@
 
 ### 3-1: 事前情報収集
 
-- [ ] Cloudflare Access アプリケーション ID を確認（production）
-- [ ] Cloudflare Access ポリシー ID を確認（production）
+- [x] Cloudflare Access アプリケーション ID を確認（production） → terraform.tfvars に記入
+- [x] Cloudflare Access ポリシー ID を確認（production） → terraform.tfvars に記入
 
 ### 3-2: Terraform コード作成（production）
 
-- [ ] `terraform/production/main.tf` を作成
+- [x] `terraform/production/main.tf` を作成
   - プロバイダ設定（AWS + Cloudflare）
   - `aws_dynamodb_table.main`（tsundoku-dragon-prod）
   - `cloudflare_workers_kv_namespace.main`
   - `cloudflare_zero_trust_access_application.main`
   - `cloudflare_zero_trust_access_policy.main`
   - ※ IAM は管理対象外
-- [ ] `terraform/production/variables.tf` を作成
-- [ ] `terraform/production/outputs.tf` を作成
-- [ ] `terraform/production/terraform.tfvars.example` を作成（テンプレート）
-- [ ] `terraform/production/terraform.tfvars` を作成（実際の値を記入）
+- [x] `terraform/production/variables.tf` を作成
+- [x] `terraform/production/outputs.tf` を作成
+- [x] `terraform/production/terraform.tfvars.example` を作成（テンプレート）
+- [x] `terraform/production/terraform.tfvars` を作成（実際の値を記入）
 
 ### 3-3: 既存リソースの import（production）
 
-- [ ] `terraform init` を実行
-- [ ] DynamoDB テーブルを import
-  ```bash
-  terraform import aws_dynamodb_table.main tsundoku-dragon-prod
-  ```
-- [ ] KV Namespace を import
-  ```bash
-  terraform import cloudflare_workers_kv_namespace.main <account_id>/1f79768d91be42e586b4c7d3a186e94e
-  ```
-- [ ] Access Application を import
-- [ ] Access Policy を import
+- [x] `terraform init` を実行
+- [x] DynamoDB テーブルを import
+- [x] KV Namespace を import
+- [x] Access Application を import
+- [x] Access Policy を import
 
 ### 3-4: 差分確認と調整（production）
 
-- [ ] `terraform plan` を実行し、差分を確認
-- [ ] 差分がある場合、Terraform コードを既存リソースに合わせて調整
-- [ ] `terraform plan` で **No changes** になることを確認
+- [x] `terraform plan` を実行し、差分を確認
+- [x] 差分がある場合、Terraform コードを既存リソースに合わせて調整（DynamoDB キャパシティ 24、Access App 名 `tsundoku-dragon-production`）
+- [x] `terraform plan` で **No changes** になることを確認
 
 ## フェーズ4: 検証・仕上げ
 
