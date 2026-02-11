@@ -138,12 +138,14 @@
 
 ### うまくいったこと
 
--
+- staging の Terraform コードをベースに production をスムーズに作成できた
+- import → plan → 差分修正のサイクルが確立されていた
 
 ### 改善点
 
--
+- DynamoDB キャパシティや Access App 名など、実際の値を事前に確認してから tfvars を作成すべきだった（plan で初めて気づいた）
 
 ### 次回への学び
 
--
+- Cloudflare Access の v5 import 形式（`accounts/<account_id>/<app_id>`）を忘れずに
+- production の DynamoDB キャパシティは staging と異なる場合がある（24 vs 1）
