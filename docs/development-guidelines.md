@@ -2,15 +2,15 @@
 
 ## 技術スタック
 
-| レイヤー       | 技術                             |
-| -------------- | -------------------------------- |
-| フロントエンド | React + TypeScript（Vite）       |
-| ホスティング   | Cloudflare Pages                 |
-| API            | Cloudflare Workers + Hono        |
-| データベース   | DynamoDB（Provisioned mode）     |
-| 認証           | Firebase Auth（Google, Twitter） |
-| 画像ストレージ | Cloudflare R2                    |
-| IaC            | Terraform（予定）                |
+| レイヤー       | 技術                                                 |
+| -------------- | ---------------------------------------------------- |
+| フロントエンド | React + TypeScript（Vite）                           |
+| ホスティング   | Cloudflare Pages                                     |
+| API            | Cloudflare Workers + Hono                            |
+| データベース   | DynamoDB（Provisioned mode）                         |
+| 認証           | Firebase Auth（Google, Twitter）                     |
+| 画像ストレージ | Cloudflare R2                                        |
+| IaC            | Terraform（[方針](../planning/terraform-policy.md)） |
 
 ## ブランチ戦略（GitHub Flow）
 
