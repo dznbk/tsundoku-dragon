@@ -28,7 +28,7 @@
 ## 進捗
 
 - 開始: 2026-02-11
-- 完了: （未完了）
+- 完了: 2026-02-11
 
 ---
 
@@ -119,12 +119,12 @@
 
 ## フェーズ4: 検証・仕上げ
 
-- [ ] staging で `terraform plan` を再実行し、No changes を確認
-- [ ] production で `terraform plan` を再実行し、No changes を確認
-- [ ] `terraform output` で出力値が wrangler.toml の値と一致することを確認
-- [ ] 既存のアプリケーション動作に影響がないことを確認（staging にアクセス）
-- [ ] Terraform 関連ファイルが `.gitignore` で正しく除外されていることを確認
-- [ ] コミット・プッシュ（`.tf` ファイルと `.tfvars.example` のみ。`.tfstate` / `terraform.tfvars` は除外）
+- [x] staging で `terraform plan` を再実行し、No changes を確認
+- [x] production で `terraform plan` を再実行し、No changes を確認
+- [x] `terraform output` で出力値が wrangler.toml の値と一致することを確認
+- [x] 既存のアプリケーション動作に影響がないことを確認（staging にアクセス）
+- [x] Terraform 関連ファイルが `.gitignore` で正しく除外されていることを確認
+- [x] コミット・プッシュ（`.tf` ファイルと `.tfvars.example` のみ。`.tfstate` / `terraform.tfvars` は除外） → PR #74
 
 ---
 
