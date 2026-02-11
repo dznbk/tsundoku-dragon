@@ -1,0 +1,22 @@
+# AWS
+aws_region             = "ap-northeast-1"
+dynamodb_table_name    = "tsundoku-dragon-staging"
+dynamodb_read_capacity  = 1
+dynamodb_write_capacity = 1
+
+# IAM（staging で一元管理：両環境のテーブル ARN を指定）
+iam_user_name = "tsundoku-dragon-worker"
+dynamodb_table_arns = [
+  "arn:aws:dynamodb:ap-northeast-1:<ACCOUNT_ID>:table/tsundoku-dragon-staging",
+  "arn:aws:dynamodb:ap-northeast-1:<ACCOUNT_ID>:table/tsundoku-dragon-prod",
+]
+
+# Cloudflare
+cloudflare_api_token   = "<CLOUDFLARE_API_TOKEN>"
+cloudflare_account_id  = "<CLOUDFLARE_ACCOUNT_ID>"
+kv_namespace_title     = "<KV_NAMESPACE_TITLE>"  # Cloudflare ダッシュボードで確認
+
+# Cloudflare Access
+access_app_name        = "tsundoku-dragon-staging"
+access_app_domain      = "stg.tsundoku.deepon.dev"
+access_allowed_emails  = ["your-email@example.com"]
