@@ -219,9 +219,15 @@ describe('SkillRepository', () => {
 
   describe('upsertUserSkillExp', () => {
     it('新規スキル経験値を作成する', async () => {
-      // findUserSkillExp のレスポンス（存在しない）
-      mockSend.mockResolvedValueOnce({});
-      // PutCommand のレスポンス
+      // UpdateCommand(ADD exp) のレスポンス
+      mockSend.mockResolvedValueOnce({
+        Attributes: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+          exp: 50,
+        },
+      });
+      // UpdateCommand(SET level) のレスポンス
       mockSend.mockResolvedValueOnce({});
 
       const result = await repository.upsertUserSkillExp(
@@ -231,15 +237,34 @@ describe('SkillRepository', () => {
       );
 
       expect(mockSend).toHaveBeenCalledTimes(2);
-      // PutCommand の呼び出しを確認
-      const putCommand = mockSend.mock.calls[1][0];
-      expect(putCommand.input).toEqual({
+      // UpdateCommand(ADD exp) の呼び出しを確認
+      const addCommand = mockSend.mock.calls[0][0];
+      expect(addCommand.input).toEqual({
         TableName: 'test-table',
-        Item: {
+        Key: {
           PK: 'USER#user-123',
           SK: 'SKILL#TypeScript',
-          exp: 50,
-          level: 2, // 50expでレベル2
+        },
+        UpdateExpression: 'ADD exp :expToAdd',
+        ExpressionAttributeValues: {
+          ':expToAdd': 50,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      // UpdateCommand(SET level) の呼び出しを確認
+      const setLevelCommand = mockSend.mock.calls[1][0];
+      expect(setLevelCommand.input).toEqual({
+        TableName: 'test-table',
+        Key: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+        },
+        UpdateExpression: 'SET #level = :newLevel',
+        ExpressionAttributeNames: {
+          '#level': 'level',
+        },
+        ExpressionAttributeValues: {
+          ':newLevel': 2, // 50expでレベル2
         },
       });
       expect(result).toEqual({
@@ -250,16 +275,16 @@ describe('SkillRepository', () => {
     });
 
     it('既存スキル経験値を更新する', async () => {
-      // findUserSkillExp のレスポンス（既存）
+      // UpdateCommand(ADD exp) のレスポンス（累積60exp）
       mockSend.mockResolvedValueOnce({
-        Item: {
+        Attributes: {
           PK: 'USER#user-123',
           SK: 'SKILL#TypeScript',
-          exp: 40,
+          exp: 60, // 既存40 + 追加20
           level: 1,
         },
       });
-      // PutCommand のレスポンス
+      // UpdateCommand(SET level) のレスポンス
       mockSend.mockResolvedValueOnce({});
 
       const result = await repository.upsertUserSkillExp(
@@ -269,15 +294,34 @@ describe('SkillRepository', () => {
       );
 
       expect(mockSend).toHaveBeenCalledTimes(2);
-      // PutCommand の呼び出しを確認
-      const putCommand = mockSend.mock.calls[1][0];
-      expect(putCommand.input).toEqual({
+      // UpdateCommand(ADD exp) の呼び出しを確認
+      const addCommand = mockSend.mock.calls[0][0];
+      expect(addCommand.input).toEqual({
         TableName: 'test-table',
-        Item: {
+        Key: {
           PK: 'USER#user-123',
           SK: 'SKILL#TypeScript',
-          exp: 60, // 40 + 20
-          level: 2, // 60expでレベル2
+        },
+        UpdateExpression: 'ADD exp :expToAdd',
+        ExpressionAttributeValues: {
+          ':expToAdd': 20,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      // UpdateCommand(SET level) の呼び出しを確認
+      const setLevelCommand = mockSend.mock.calls[1][0];
+      expect(setLevelCommand.input).toEqual({
+        TableName: 'test-table',
+        Key: {
+          PK: 'USER#user-123',
+          SK: 'SKILL#TypeScript',
+        },
+        UpdateExpression: 'SET #level = :newLevel',
+        ExpressionAttributeNames: {
+          '#level': 'level',
+        },
+        ExpressionAttributeValues: {
+          ':newLevel': 2, // 60expでレベル2
         },
       });
       expect(result).toEqual({
