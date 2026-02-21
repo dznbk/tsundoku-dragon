@@ -1,4 +1,9 @@
-import { GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { createDynamoDBClient, type Env } from '../lib/dynamodb';
 import { levelFromExp } from '../lib/expCalculator';
 
@@ -149,19 +154,47 @@ export class SkillRepository {
     skillName: string,
     expToAdd: number
   ): Promise<UserSkillExp> {
-    const existing = await this.findUserSkillExp(userId, skillName);
-    const previousExp = existing?.exp ?? 0;
-    const newExp = previousExp + expToAdd;
-    const newLevel = levelFromExp(newExp);
-
-    await this.client.send(
-      new PutCommand({
+    // Step 1: exp をアトミックに加算
+    const result = await this.client.send(
+      new UpdateCommand({
         TableName: this.tableName,
-        Item: {
+        Key: {
           PK: `USER#${userId}`,
           SK: `SKILL#${skillName}`,
-          exp: newExp,
-          level: newLevel,
+        },
+        UpdateExpression: 'ADD exp :expToAdd',
+        ExpressionAttributeValues: {
+          ':expToAdd': expToAdd,
+        },
+        ReturnValues: 'ALL_NEW',
+      })
+    );
+
+    if (!result.Attributes) {
+      throw new Error(
+        `DynamoDB UpdateCommand の応答に Attributes が含まれていません: userId=${userId}, skillName=${skillName}`
+      );
+    }
+    const newExp = result.Attributes.exp as number;
+    const newLevel = levelFromExp(newExp);
+
+    // Step 2: level を更新（level は DynamoDB 予約語）
+    // NOTE: Step 1 と Step 2 はアトミックではない。
+    // Step 2 が失敗した場合、exp が加算されたまま level が古い状態で残るが、
+    // 次回 upsertUserSkillExp が呼ばれると level は再計算されて修復される。
+    await this.client.send(
+      new UpdateCommand({
+        TableName: this.tableName,
+        Key: {
+          PK: `USER#${userId}`,
+          SK: `SKILL#${skillName}`,
+        },
+        UpdateExpression: 'SET #level = :newLevel',
+        ExpressionAttributeNames: {
+          '#level': 'level',
+        },
+        ExpressionAttributeValues: {
+          ':newLevel': newLevel,
         },
       })
     );
