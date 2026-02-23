@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BookService } from './bookService';
+import { BadRequestError } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -319,7 +320,7 @@ describe('BookService', () => {
 
       await expect(
         service.updateBook('user-123', 'book-123', { title: '更新後' })
-      ).rejects.toThrow('Cannot update archived book');
+      ).rejects.toThrow(BadRequestError);
     });
 
     it('新規スキルをカスタムスキルに登録する', async () => {
@@ -378,7 +379,7 @@ describe('BookService', () => {
       mockFindById.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
 
       await expect(service.archiveBook('user-123', 'book-123')).rejects.toThrow(
-        'Book is already archived'
+        BadRequestError
       );
     });
   });
@@ -434,7 +435,7 @@ describe('BookService', () => {
       });
 
       await expect(service.resetBook('user-123', 'book-123')).rejects.toThrow(
-        'Can only reset completed books'
+        BadRequestError
       );
     });
   });
@@ -619,7 +620,7 @@ describe('BookService', () => {
 
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
-      ).rejects.toThrow('Book is not in reading status');
+      ).rejects.toThrow(BadRequestError);
     });
 
     it('archived状態の本はエラー', async () => {
@@ -630,7 +631,7 @@ describe('BookService', () => {
 
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
-      ).rejects.toThrow('Book is not in reading status');
+      ).rejects.toThrow(BadRequestError);
     });
 
     describe('経験値システム', () => {

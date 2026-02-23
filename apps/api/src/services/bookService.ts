@@ -11,6 +11,7 @@ import type {
   CreateBattleLogInput,
 } from '../types/api';
 import type { Env } from '../lib/dynamodb';
+import { BadRequestError } from '../lib/errors';
 import { defeatBonus as calcDefeatBonus } from '../lib/expCalculator';
 
 export interface SkillResult {
@@ -109,7 +110,7 @@ export class BookService {
     }
 
     if (book.status === 'archived') {
-      throw new Error('Cannot update archived book');
+      throw new BadRequestError('Cannot update archived book');
     }
 
     const now = new Date().toISOString();
@@ -135,7 +136,7 @@ export class BookService {
     }
 
     if (book.status === 'archived') {
-      throw new Error('Book is already archived');
+      throw new BadRequestError('Book is already archived');
     }
 
     const now = new Date().toISOString();
@@ -154,7 +155,7 @@ export class BookService {
     }
 
     if (book.status !== 'completed') {
-      throw new Error('Can only reset completed books');
+      throw new BadRequestError('Can only reset completed books');
     }
 
     const now = new Date().toISOString();
@@ -190,7 +191,7 @@ export class BookService {
     }
 
     if (book.status !== 'reading') {
-      throw new Error('Book is not in reading status');
+      throw new BadRequestError('Book is not in reading status');
     }
 
     const now = new Date().toISOString();

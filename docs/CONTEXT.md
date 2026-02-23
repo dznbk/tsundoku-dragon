@@ -94,6 +94,7 @@
 - Terraform 方針策定（プロビジョニングとデプロイの分離、環境ごとディレクトリ分離、ローカル State）
 - staging 環境の Terraform 化（DynamoDB、IAM、KV Namespace、Cloudflare Access の既存リソース import）
 - production 環境の Terraform 化（DynamoDB、KV Namespace、Cloudflare Access の既存リソース import。IAM は staging で一元管理）
+- エラーハンドリング共通化（#76）（AppError/BadRequestError、handleError、app.onError、try-catch除去）
 
 ### 次にやること
 
