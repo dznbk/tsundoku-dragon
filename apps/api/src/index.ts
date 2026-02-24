@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
 import { createDynamoDBClient, type Env } from './lib/dynamodb';
+import { handleError } from './lib/errors';
 import { authMiddleware } from './middleware/auth';
 import books from './routes/books';
 import skills from './routes/skills';
@@ -60,5 +61,8 @@ app.get('/db/health', async (c) => {
     );
   }
 });
+
+// グローバルエラーハンドラ
+app.onError(handleError);
 
 export default app;

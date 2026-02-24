@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
 import books from './books';
+import { handleError } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -43,7 +44,9 @@ describe('Books Routes', () => {
     PUBLIC_JWK_CACHE_KV: {} as KVNamespace,
   };
 
-  const app = new Hono().route('/books', books);
+  const app = new Hono();
+  app.route('/books', books);
+  app.onError(handleError);
 
   beforeEach(() => {
     vi.clearAllMocks();

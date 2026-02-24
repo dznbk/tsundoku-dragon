@@ -32,9 +32,6 @@ books.get('/:id', async (c) => {
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
   const book = await service.getBook(userId, bookId);
-  if (!book) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
   return c.json(book);
 });
 
@@ -43,66 +40,24 @@ books.put('/:id', zValidator('json', updateBookSchema), async (c) => {
   const bookId = c.req.param('id');
   const input = c.req.valid('json');
   const service = new BookService(c.env);
-
-  try {
-    const book = await service.updateBook(userId, bookId, input);
-    if (!book) {
-      return c.json({ error: 'Book not found' }, 404);
-    }
-    return c.json(book);
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === 'Cannot update archived book'
-    ) {
-      return c.json({ error: error.message }, 400);
-    }
-    throw error;
-  }
+  const book = await service.updateBook(userId, bookId, input);
+  return c.json(book);
 });
 
 books.delete('/:id', async (c) => {
   const userId = getAuthUserId(c);
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
-
-  try {
-    const success = await service.archiveBook(userId, bookId);
-    if (!success) {
-      return c.json({ error: 'Book not found' }, 404);
-    }
-    return c.body(null, 204);
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === 'Book is already archived'
-    ) {
-      return c.json({ error: error.message }, 400);
-    }
-    throw error;
-  }
+  await service.archiveBook(userId, bookId);
+  return c.body(null, 204);
 });
 
 books.post('/:id/reset', async (c) => {
   const userId = getAuthUserId(c);
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
-
-  try {
-    const book = await service.resetBook(userId, bookId);
-    if (!book) {
-      return c.json({ error: 'Book not found' }, 404);
-    }
-    return c.json(book);
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === 'Can only reset completed books'
-    ) {
-      return c.json({ error: error.message }, 400);
-    }
-    throw error;
-  }
+  const book = await service.resetBook(userId, bookId);
+  return c.json(book);
 });
 
 books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
@@ -116,10 +71,6 @@ books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
     cursor: query.cursor,
   });
 
-  if (!result) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
-
   return c.json(result);
 });
 
@@ -131,22 +82,8 @@ books.post(
     const bookId = c.req.param('id');
     const input = c.req.valid('json');
     const service = new BookService(c.env);
-
-    try {
-      const result = await service.recordBattle(userId, bookId, input);
-      if (!result) {
-        return c.json({ error: 'Book not found' }, 404);
-      }
-      return c.json(result, 201);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === 'Book is not in reading status'
-      ) {
-        return c.json({ error: error.message }, 400);
-      }
-      throw error;
-    }
+    const result = await service.recordBattle(userId, bookId, input);
+    return c.json(result, 201);
   }
 );
 
