@@ -26,6 +26,19 @@ vi.mock('../repositories/bookRepository', () => ({
   },
 }));
 
+const mockFindUserSkillExp = vi.fn();
+const mockUpsertUserSkillExp = vi.fn();
+
+vi.mock('../repositories/skillRepository', () => ({
+  SkillRepository: class {
+    findGlobalSkills = vi.fn().mockResolvedValue([]);
+    findUserCustomSkills = vi.fn().mockResolvedValue([]);
+    saveUserCustomSkill = vi.fn();
+    findUserSkillExp = mockFindUserSkillExp;
+    upsertUserSkillExp = mockUpsertUserSkillExp;
+  },
+}));
+
 // Firebase Auth のモック
 vi.mock('../middleware/auth', () => ({
   getAuthUserId: vi.fn(() => 'test-user'),
@@ -52,6 +65,16 @@ describe('Books Routes', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+
+    // デフォルトの経験値モック設定（BattleService用）
+    mockFindUserSkillExp.mockResolvedValue(null);
+    mockUpsertUserSkillExp.mockImplementation(
+      async (_userId: string, skillName: string, expToAdd: number) => ({
+        name: skillName,
+        exp: expToAdd,
+        level: 1,
+      })
+    );
   });
 
   afterEach(() => {
