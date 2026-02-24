@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Hono } from 'hono';
 import type { Book, BattleLog } from '@tsundoku-dragon/shared';
 import books from './books';
+import { handleError } from '../lib/errors';
 import {
   setupTestDB,
   createTestEnv,
@@ -53,7 +54,9 @@ describe('Books Routes Integration', () => {
   let testEnv: ReturnType<typeof createTestEnv>;
   let repository: BookRepository;
 
-  const app = new Hono().route('/books', books);
+  const app = new Hono();
+  app.route('/books', books);
+  app.onError(handleError);
 
   beforeAll(async () => {
     await setupTestDB();
