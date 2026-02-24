@@ -12,6 +12,7 @@ export class BookService {
 
   constructor(env: Env) {
     this.repository = new BookRepository(env);
+    // 本登録・更新時に新規スキルをカスタムスキルへ自動登録するために使用
     this.skillRepository = new SkillRepository(env);
   }
 

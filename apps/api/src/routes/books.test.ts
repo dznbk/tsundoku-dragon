@@ -26,14 +26,17 @@ vi.mock('../repositories/bookRepository', () => ({
   },
 }));
 
+const mockFindGlobalSkills = vi.fn();
+const mockFindUserCustomSkills = vi.fn();
+const mockSaveUserCustomSkill = vi.fn();
 const mockFindUserSkillExp = vi.fn();
 const mockUpsertUserSkillExp = vi.fn();
 
 vi.mock('../repositories/skillRepository', () => ({
   SkillRepository: class {
-    findGlobalSkills = vi.fn().mockResolvedValue([]);
-    findUserCustomSkills = vi.fn().mockResolvedValue([]);
-    saveUserCustomSkill = vi.fn();
+    findGlobalSkills = mockFindGlobalSkills;
+    findUserCustomSkills = mockFindUserCustomSkills;
+    saveUserCustomSkill = mockSaveUserCustomSkill;
     findUserSkillExp = mockFindUserSkillExp;
     upsertUserSkillExp = mockUpsertUserSkillExp;
   },
@@ -65,6 +68,10 @@ describe('Books Routes', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+
+    // デフォルトのスキルモック設定
+    mockFindGlobalSkills.mockResolvedValue([]);
+    mockFindUserCustomSkills.mockResolvedValue([]);
 
     // デフォルトの経験値モック設定（BattleService用）
     mockFindUserSkillExp.mockResolvedValue(null);
