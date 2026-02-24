@@ -26,6 +26,16 @@ export class BadRequestError extends AppError {
 }
 
 /**
+ * リソースが見つからないことを表す404エラー
+ */
+export class NotFoundError extends AppError {
+  constructor(message: string) {
+    super(404, message);
+    this.name = 'NotFoundError';
+  }
+}
+
+/**
  * グローバルエラーハンドラ
  * AppErrorはステータスコード付きJSONで返し、それ以外は500を返す
  */

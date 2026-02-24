@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BookService } from './bookService';
-import { BadRequestError } from '../lib/errors';
+import { BadRequestError, NotFoundError } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -263,12 +263,12 @@ describe('BookService', () => {
       expect(result).toEqual(mockBook);
     });
 
-    it('存在しない本はnullを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.getBook('user-123', 'not-exist');
-
-      expect(result).toBeNull();
+      await expect(service.getBook('user-123', 'not-exist')).rejects.toThrow(
+        NotFoundError
+      );
     });
   });
 
@@ -304,14 +304,12 @@ describe('BookService', () => {
       expect(result?.title).toBe('更新後タイトル');
     });
 
-    it('存在しない本はnullを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.updateBook('user-123', 'not-exist', {
-        title: '更新後',
-      });
-
-      expect(result).toBeNull();
+      await expect(
+        service.updateBook('user-123', 'not-exist', { title: '更新後' })
+      ).rejects.toThrow(NotFoundError);
       expect(mockUpdate).not.toHaveBeenCalled();
     });
 
@@ -358,21 +356,20 @@ describe('BookService', () => {
       mockFindById.mockResolvedValueOnce(mockBook);
       mockUpdate.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
 
-      const result = await service.archiveBook('user-123', 'book-123');
+      await service.archiveBook('user-123', 'book-123');
 
-      expect(result).toBe(true);
       expect(mockUpdate).toHaveBeenCalledWith('user-123', 'book-123', {
         status: 'archived',
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
     });
 
-    it('存在しない本はfalseを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.archiveBook('user-123', 'not-exist');
-
-      expect(result).toBe(false);
+      await expect(
+        service.archiveBook('user-123', 'not-exist')
+      ).rejects.toThrow(NotFoundError);
     });
 
     it('既にアーカイブ済みの本はエラー', async () => {
@@ -420,12 +417,12 @@ describe('BookService', () => {
       expect(result?.currentPage).toBe(0);
     });
 
-    it('存在しない本はnullを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.resetBook('user-123', 'not-exist');
-
-      expect(result).toBeNull();
+      await expect(service.resetBook('user-123', 'not-exist')).rejects.toThrow(
+        NotFoundError
+      );
     });
 
     it('戦闘中の本はリセットできない', async () => {
@@ -479,12 +476,12 @@ describe('BookService', () => {
       expect(result?.logs).toHaveLength(1);
     });
 
-    it('存在しない本はnullを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.getBookLogs('user-123', 'not-exist');
-
-      expect(result).toBeNull();
+      await expect(
+        service.getBookLogs('user-123', 'not-exist')
+      ).rejects.toThrow(NotFoundError);
       expect(mockFindLogs).not.toHaveBeenCalled();
     });
 
@@ -600,14 +597,12 @@ describe('BookService', () => {
       expect(result?.defeat).toBe(true);
     });
 
-    it('存在しない本はnullを返す', async () => {
+    it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      const result = await service.recordBattle('user-123', 'not-exist', {
-        pagesRead: 30,
-      });
-
-      expect(result).toBeNull();
+      await expect(
+        service.recordBattle('user-123', 'not-exist', { pagesRead: 30 })
+      ).rejects.toThrow(NotFoundError);
       expect(mockSaveLog).not.toHaveBeenCalled();
       expect(mockUpdate).not.toHaveBeenCalled();
     });

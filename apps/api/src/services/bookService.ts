@@ -11,7 +11,7 @@ import type {
   CreateBattleLogInput,
 } from '../types/api';
 import type { Env } from '../lib/dynamodb';
-import { BadRequestError } from '../lib/errors';
+import { BadRequestError, NotFoundError } from '../lib/errors';
 import { defeatBonus as calcDefeatBonus } from '../lib/expCalculator';
 
 export interface SkillResult {
@@ -95,18 +95,22 @@ export class BookService {
     return this.repository.findByUserId(userId);
   }
 
-  async getBook(userId: string, bookId: string): Promise<Book | null> {
-    return this.repository.findById(userId, bookId);
+  async getBook(userId: string, bookId: string): Promise<Book> {
+    const book = await this.repository.findById(userId, bookId);
+    if (!book) {
+      throw new NotFoundError('Book not found');
+    }
+    return book;
   }
 
   async updateBook(
     userId: string,
     bookId: string,
     input: UpdateBookInput
-  ): Promise<Book | null> {
+  ): Promise<Book> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      return null;
+      throw new NotFoundError('Book not found');
     }
 
     if (book.status === 'archived') {
@@ -126,13 +130,13 @@ export class BookService {
       await this.registerNewSkillsAsCustomSkills(userId, input.skills);
     }
 
-    return updatedBook;
+    return updatedBook!;
   }
 
-  async archiveBook(userId: string, bookId: string): Promise<boolean> {
+  async archiveBook(userId: string, bookId: string): Promise<void> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      return false;
+      throw new NotFoundError('Book not found');
     }
 
     if (book.status === 'archived') {
@@ -144,14 +148,12 @@ export class BookService {
       status: 'archived',
       updatedAt: now,
     });
-
-    return true;
   }
 
-  async resetBook(userId: string, bookId: string): Promise<Book | null> {
+  async resetBook(userId: string, bookId: string): Promise<Book> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      return null;
+      throw new NotFoundError('Book not found');
     }
 
     if (book.status !== 'completed') {
@@ -159,22 +161,23 @@ export class BookService {
     }
 
     const now = new Date().toISOString();
-    return this.repository.update(userId, bookId, {
+    const updatedBook = await this.repository.update(userId, bookId, {
       currentPage: 0,
       round: book.round + 1,
       status: 'reading',
       updatedAt: now,
     });
+    return updatedBook!;
   }
 
   async getBookLogs(
     userId: string,
     bookId: string,
     options?: { limit?: number; cursor?: string }
-  ): Promise<LogsQueryResult | null> {
+  ): Promise<LogsQueryResult> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      return null;
+      throw new NotFoundError('Book not found');
     }
 
     return this.repository.findLogs(userId, bookId, options);
@@ -184,10 +187,10 @@ export class BookService {
     userId: string,
     bookId: string,
     input: CreateBattleLogInput
-  ): Promise<RecordBattleResult | null> {
+  ): Promise<RecordBattleResult> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      return null;
+      throw new NotFoundError('Book not found');
     }
 
     if (book.status !== 'reading') {

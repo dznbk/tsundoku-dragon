@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AppError, BadRequestError } from './errors';
+import { AppError, BadRequestError, NotFoundError } from './errors';
 
 describe('AppError', () => {
   it('statusCodeとmessageを保持する', () => {
@@ -33,5 +33,23 @@ describe('BadRequestError', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(AppError);
     expect(error).toBeInstanceOf(BadRequestError);
+  });
+});
+
+describe('NotFoundError', () => {
+  it('statusCodeが404である', () => {
+    const error = new NotFoundError('not found');
+
+    expect(error.statusCode).toBe(404);
+    expect(error.message).toBe('not found');
+    expect(error.name).toBe('NotFoundError');
+  });
+
+  it('AppErrorのインスタンスである', () => {
+    const error = new NotFoundError('test');
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(AppError);
+    expect(error).toBeInstanceOf(NotFoundError);
   });
 });

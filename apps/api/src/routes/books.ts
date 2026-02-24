@@ -32,9 +32,6 @@ books.get('/:id', async (c) => {
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
   const book = await service.getBook(userId, bookId);
-  if (!book) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
   return c.json(book);
 });
 
@@ -44,9 +41,6 @@ books.put('/:id', zValidator('json', updateBookSchema), async (c) => {
   const input = c.req.valid('json');
   const service = new BookService(c.env);
   const book = await service.updateBook(userId, bookId, input);
-  if (!book) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
   return c.json(book);
 });
 
@@ -54,10 +48,7 @@ books.delete('/:id', async (c) => {
   const userId = getAuthUserId(c);
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
-  const success = await service.archiveBook(userId, bookId);
-  if (!success) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
+  await service.archiveBook(userId, bookId);
   return c.body(null, 204);
 });
 
@@ -66,9 +57,6 @@ books.post('/:id/reset', async (c) => {
   const bookId = c.req.param('id');
   const service = new BookService(c.env);
   const book = await service.resetBook(userId, bookId);
-  if (!book) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
   return c.json(book);
 });
 
@@ -83,10 +71,6 @@ books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
     cursor: query.cursor,
   });
 
-  if (!result) {
-    return c.json({ error: 'Book not found' }, 404);
-  }
-
   return c.json(result);
 });
 
@@ -99,9 +83,6 @@ books.post(
     const input = c.req.valid('json');
     const service = new BookService(c.env);
     const result = await service.recordBattle(userId, bookId, input);
-    if (!result) {
-      return c.json({ error: 'Book not found' }, 404);
-    }
     return c.json(result, 201);
   }
 );
