@@ -24,7 +24,7 @@ export function useUserStatus() {
     setIsLoading(true);
 
     try {
-      const response = await getSkills(user);
+      const response = await getSkills();
       setUserSkillExps(response.userSkillExps);
     } catch {
       // スキル取得失敗時は空のままにする（必須機能ではないため）

@@ -8,6 +8,3 @@ export { useAuth } from './hooks/useAuth';
 // Components
 export { GoogleLoginButton } from './components/GoogleLoginButton';
 export { ProtectedRoute } from './components/ProtectedRoute';
-
-// Services
-export { apiClient, ApiError } from './services/authApi';

@@ -20,6 +20,7 @@ tsundoku-dragon/
 
 ```
 apps/web/src/
+├── lib/                # アプリ基盤（Firebase初期化、APIクライアント等）
 ├── features/           # 機能別ディレクトリ
 │   ├── books/          # 本（ドラゴン）関連
 │   │   ├── components/ # UIコンポーネント

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock environment variables before importing authApi
+// Mock environment variables before importing apiClient
 vi.stubEnv('VITE_API_URL', 'http://localhost:8787');
 
 // Use vi.hoisted to define mocks that vi.mock can reference
@@ -14,7 +14,7 @@ const { mockGetIdToken, mockAuth } = vi.hoisted(() => {
   return { mockGetIdToken, mockAuth };
 });
 
-vi.mock('../../../lib/firebase', () => ({
+vi.mock('./firebase', () => ({
   auth: mockAuth,
 }));
 
@@ -23,7 +23,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
 // Import after mocking
-import { apiClient, ApiError } from './authApi';
+import { apiClient, ApiError } from './apiClient';
 
 // Helper to create mock response with headers
 function createMockResponse(options: {
@@ -41,7 +41,7 @@ function createMockResponse(options: {
   };
 }
 
-describe('authApi', () => {
+describe('apiClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.currentUser = {

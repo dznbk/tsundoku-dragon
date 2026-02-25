@@ -1,5 +1,4 @@
-import type { User } from 'firebase/auth';
-import { ApiError } from './bookApi';
+import { apiClient } from '../../../lib/apiClient';
 
 export interface UserSkillExp {
   name: string;
@@ -13,20 +12,6 @@ export interface SkillsResponse {
   userSkillExps: UserSkillExp[];
 }
 
-export async function getSkills(user: User): Promise<SkillsResponse> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/skills`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to fetch skills', response.status);
-  }
-
-  return response.json();
+export async function getSkills(): Promise<SkillsResponse> {
+  return apiClient.get<SkillsResponse>('/skills');
 }

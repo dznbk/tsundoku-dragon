@@ -24,7 +24,7 @@ export function useSkills(): UseSkillsResult {
     setError(null);
 
     try {
-      const response = await getSkills(user);
+      const response = await getSkills();
       setSkills(response.userSkillExps);
     } catch {
       setError('スキルの取得に失敗しました');
