@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import type { Env } from '../types/env';
 import { getAuthUserId } from '../middleware/auth';
 import { BookService } from '../services/bookService';
+import { BattleService } from '../services/battleService';
 import {
   createBookSchema,
   updateBookSchema,
@@ -64,7 +65,7 @@ books.get('/:id/logs', zValidator('query', logsQuerySchema), async (c) => {
   const userId = getAuthUserId(c);
   const bookId = c.req.param('id');
   const query = c.req.valid('query');
-  const service = new BookService(c.env);
+  const service = new BattleService(c.env);
 
   const result = await service.getBookLogs(userId, bookId, {
     limit: query.limit,
@@ -81,7 +82,7 @@ books.post(
     const userId = getAuthUserId(c);
     const bookId = c.req.param('id');
     const input = c.req.valid('json');
-    const service = new BookService(c.env);
+    const service = new BattleService(c.env);
     const result = await service.recordBattle(userId, bookId, input);
     return c.json(result, 201);
   }
