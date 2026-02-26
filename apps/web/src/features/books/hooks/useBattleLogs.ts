@@ -17,7 +17,7 @@ export function useBattleLogs(bookId: string) {
     setError(null);
 
     try {
-      const result = await getBookLogs(user, bookId, { limit: 20 });
+      const result = await getBookLogs(bookId, { limit: 20 });
       setLogs(result.logs);
       setNextCursor(result.nextCursor);
     } catch {
@@ -37,7 +37,7 @@ export function useBattleLogs(bookId: string) {
     setIsLoadingMore(true);
 
     try {
-      const result = await getBookLogs(user, bookId, {
+      const result = await getBookLogs(bookId, {
         limit: 20,
         cursor: nextCursor,
       });

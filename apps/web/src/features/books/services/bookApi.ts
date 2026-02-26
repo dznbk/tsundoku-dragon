@@ -1,4 +1,4 @@
-import type { User } from 'firebase/auth';
+import { apiClient } from '../../../lib/apiClient';
 
 export interface CreateBookInput {
   title: string;
@@ -63,183 +63,51 @@ export interface Book {
   updatedAt: string;
 }
 
-export class ApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-  }
+export async function createBook(input: CreateBookInput): Promise<Book> {
+  return apiClient.post<Book>('/books', input);
 }
 
-export async function createBook(
-  user: User,
-  input: CreateBookInput
-): Promise<Book> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to create book', response.status);
-  }
-
-  return response.json();
-}
-
-export async function getBooks(user: User): Promise<Book[]> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to fetch books', response.status);
-  }
-
-  const data = await response.json();
+export async function getBooks(): Promise<Book[]> {
+  const data = await apiClient.get<{ books: Book[] }>('/books');
   return data.books;
 }
 
-export async function getBook(user: User, bookId: string): Promise<Book> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books/${bookId}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to fetch book', response.status);
-  }
-
-  return response.json();
+export async function getBook(bookId: string): Promise<Book> {
+  return apiClient.get<Book>(`/books/${bookId}`);
 }
 
 export async function updateBook(
-  user: User,
   bookId: string,
   input: UpdateBookInput
 ): Promise<Book> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books/${bookId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to update book', response.status);
-  }
-
-  return response.json();
+  return apiClient.put<Book>(`/books/${bookId}`, input);
 }
 
-export async function deleteBook(user: User, bookId: string): Promise<void> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books/${bookId}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to delete book', response.status);
-  }
+export async function deleteBook(bookId: string): Promise<void> {
+  return apiClient.delete(`/books/${bookId}`);
 }
 
-export async function resetBook(user: User, bookId: string): Promise<Book> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books/${bookId}/reset`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to reset book', response.status);
-  }
-
-  return response.json();
+export async function resetBook(bookId: string): Promise<Book> {
+  return apiClient.post<Book>(`/books/${bookId}/reset`, {});
 }
 
 export async function getBookLogs(
-  user: User,
   bookId: string,
   options?: { limit?: number; cursor?: string }
 ): Promise<BattleLogsResponse> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
   const params = new URLSearchParams();
   if (options?.limit) params.set('limit', String(options.limit));
   if (options?.cursor) params.set('cursor', options.cursor);
 
-  const queryString = params.toString();
-  const url = `${apiUrl}/books/${bookId}/logs${queryString ? `?${queryString}` : ''}`;
+  const query = params.toString();
+  const path = `/books/${bookId}/logs${query ? `?${query}` : ''}`;
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to fetch book logs', response.status);
-  }
-
-  return response.json();
+  return apiClient.get<BattleLogsResponse>(path);
 }
 
 export async function recordBattle(
-  user: User,
   bookId: string,
   input: RecordBattleInput
 ): Promise<RecordBattleResult> {
-  const token = await user.getIdToken();
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-
-  const response = await fetch(`${apiUrl}/books/${bookId}/logs`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    throw new ApiError('Failed to record battle', response.status);
-  }
-
-  return response.json();
+  return apiClient.post<RecordBattleResult>(`/books/${bookId}/logs`, input);
 }

@@ -22,7 +22,7 @@ export function useBook(bookId: string) {
     setError(null);
 
     try {
-      const fetchedBook = await getBook(user, bookId);
+      const fetchedBook = await getBook(bookId);
       setBook(fetchedBook);
     } catch {
       setError('本の取得に失敗しました');
@@ -40,7 +40,7 @@ export function useBook(bookId: string) {
       if (!user) return false;
 
       try {
-        const updatedBook = await updateBook(user, bookId, input);
+        const updatedBook = await updateBook(bookId, input);
         setBook(updatedBook);
         return true;
       } catch {
@@ -55,7 +55,7 @@ export function useBook(bookId: string) {
     if (!user) return false;
 
     try {
-      await deleteBook(user, bookId);
+      await deleteBook(bookId);
       return true;
     } catch {
       setError('本の削除に失敗しました');
@@ -67,7 +67,7 @@ export function useBook(bookId: string) {
     if (!user) return false;
 
     try {
-      const updatedBook = await resetBook(user, bookId);
+      const updatedBook = await resetBook(bookId);
       setBook(updatedBook);
       return true;
     } catch {

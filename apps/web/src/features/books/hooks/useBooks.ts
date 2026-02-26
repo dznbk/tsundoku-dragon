@@ -21,7 +21,7 @@ export function useBooks() {
     setError(null);
 
     try {
-      const fetchedBooks = await getBooks(user);
+      const fetchedBooks = await getBooks();
       setBooks(fetchedBooks);
     } catch {
       setError('本の取得に失敗しました');

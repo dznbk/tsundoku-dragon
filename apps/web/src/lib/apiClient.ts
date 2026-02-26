@@ -1,4 +1,4 @@
-import { auth } from '../../../lib/firebase';
+import { auth } from './firebase';
 
 function getApiUrl(): string {
   const url = import.meta.env.VITE_API_URL;
@@ -10,7 +10,7 @@ function getApiUrl(): string {
   return url;
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
 
   constructor(message: string, status: number) {
@@ -87,5 +87,3 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 };
-
-export { ApiError };

@@ -31,7 +31,7 @@ export function useBattle(bookId: string): UseBattleResult {
       setError(null);
 
       try {
-        const result = await recordBattle(user, bookId, { pagesRead, memo });
+        const result = await recordBattle(bookId, { pagesRead, memo });
         return result;
       } catch {
         setError('攻撃に失敗しました');

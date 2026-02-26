@@ -9,7 +9,8 @@ import {
   submitErrorAtom,
   successMessageAtom,
 } from '../features/books/stores/bookFormAtoms';
-import { createBook, ApiError } from '../features/books/services/bookApi';
+import { createBook } from '../features/books/services/bookApi';
+import { ApiError } from '../lib/apiClient';
 import { DQWindow } from '../components/DQWindow';
 import styles from './BookRegisterPage.module.css';
 
@@ -45,7 +46,7 @@ export function BookRegisterPage({ onBack }: BookRegisterPageProps) {
     setSubmitError(null);
 
     try {
-      await createBook(user, data);
+      await createBook(data);
       setLocalSuccessMessage('討伐対象に追加しました！');
       setSuccessMessage('討伐対象に追加しました！');
       resetForm();
