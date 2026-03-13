@@ -95,6 +95,7 @@
 - staging 環境の Terraform 化（DynamoDB、IAM、KV Namespace、Cloudflare Access の既存リソース import）
 - production 環境の Terraform 化（DynamoDB、KV Namespace、Cloudflare Access の既存リソース import。IAM は staging で一元管理）
 - エラーハンドリング共通化（#76）（AppError/BadRequestError、handleError、app.onError、try-catch除去）
+- ErrorCode enum導入（#80）（構造化エラーコード、エラーレスポンスにcodeフィールド追加）
 
 ### 次にやること
 
