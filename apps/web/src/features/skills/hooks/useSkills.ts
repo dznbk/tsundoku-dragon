@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { getSkills, type UserSkillExp } from '../../books/services/skillApi';
+import { useAsyncData } from '../../../shared/hooks/useAsyncData';
 
 export interface UseSkillsResult {
   skills: UserSkillExp[];
@@ -10,32 +10,23 @@ export interface UseSkillsResult {
 
 export function useSkills(): UseSkillsResult {
   const { user } = useAuth();
-  const [skills, setSkills] = useState<UserSkillExp[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchSkills = useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
+  const {
+    data: skills,
+    isLoading,
+    error,
+  } = useAsyncData(
+    async () => {
       const response = await getSkills();
-      setSkills(response.userSkillExps);
-    } catch {
-      setError('スキルの取得に失敗しました');
-    } finally {
-      setIsLoading(false);
+      return response.userSkillExps;
+    },
+    [user],
+    [] as UserSkillExp[],
+    {
+      enabled: !!user,
+      errorMessage: 'スキルの取得に失敗しました',
     }
-  }, [user]);
-
-  useEffect(() => {
-    fetchSkills();
-  }, [fetchSkills]);
+  );
 
   return {
     skills,
