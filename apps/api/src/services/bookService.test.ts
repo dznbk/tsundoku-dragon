@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BookService } from './bookService';
-import { NotFoundError, ErrorCode } from '../lib/errors';
+import { ErrorCode } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -258,9 +258,6 @@ describe('BookService', () => {
     it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      await expect(service.getBook('user-123', 'not-exist')).rejects.toThrow(
-        NotFoundError
-      );
       await expect(
         service.getBook('user-123', 'not-exist')
       ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
@@ -304,7 +301,7 @@ describe('BookService', () => {
 
       await expect(
         service.updateBook('user-123', 'not-exist', { title: '更新後' })
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
       expect(mockUpdate).not.toHaveBeenCalled();
     });
 
@@ -366,7 +363,7 @@ describe('BookService', () => {
 
       await expect(
         service.archiveBook('user-123', 'not-exist')
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
     });
 
     it('既にアーカイブ済みの本はエラー', async () => {
@@ -419,9 +416,9 @@ describe('BookService', () => {
     it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      await expect(service.resetBook('user-123', 'not-exist')).rejects.toThrow(
-        NotFoundError
-      );
+      await expect(
+        service.resetBook('user-123', 'not-exist')
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
     });
 
     it('戦闘中の本はリセットできない', async () => {
