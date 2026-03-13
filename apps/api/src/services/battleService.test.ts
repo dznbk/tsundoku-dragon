@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BattleService } from './battleService';
-import { BadRequestError, NotFoundError } from '../lib/errors';
+import { ErrorCode } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -110,7 +110,7 @@ describe('BattleService', () => {
 
       await expect(
         service.getBookLogs('user-123', 'not-exist')
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
       expect(mockFindLogs).not.toHaveBeenCalled();
     });
 
@@ -219,7 +219,7 @@ describe('BattleService', () => {
 
       await expect(
         service.recordBattle('user-123', 'not-exist', { pagesRead: 30 })
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
       expect(mockSaveLog).not.toHaveBeenCalled();
       expect(mockUpdate).not.toHaveBeenCalled();
     });
@@ -232,7 +232,7 @@ describe('BattleService', () => {
 
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_IN_READING_STATUS });
     });
 
     it('archived状態の本はエラー', async () => {
@@ -243,7 +243,7 @@ describe('BattleService', () => {
 
       await expect(
         service.recordBattle('user-123', 'book-123', { pagesRead: 30 })
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_IN_READING_STATUS });
     });
 
     describe('経験値システム', () => {

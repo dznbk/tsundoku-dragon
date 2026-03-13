@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
 import books from './books';
-import { handleError } from '../lib/errors';
+import { handleError, ErrorCode } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -224,8 +224,9 @@ describe('Books Routes', () => {
       const res = await app.request('/books/not-exist', {}, mockEnv);
 
       expect(res.status).toBe(404);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Book not found');
+      expect(body.code).toBe(ErrorCode.BOOK_NOT_FOUND);
     });
   });
 
@@ -293,8 +294,9 @@ describe('Books Routes', () => {
       );
 
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Cannot update archived book');
+      expect(body.code).toBe(ErrorCode.CANNOT_UPDATE_ARCHIVED_BOOK);
     });
   });
 
@@ -347,8 +349,9 @@ describe('Books Routes', () => {
       );
 
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Book is already archived');
+      expect(body.code).toBe(ErrorCode.BOOK_IS_ALREADY_ARCHIVED);
     });
   });
 
@@ -413,8 +416,9 @@ describe('Books Routes', () => {
       );
 
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Can only reset completed books');
+      expect(body.code).toBe(ErrorCode.CAN_ONLY_RESET_COMPLETED_BOOKS);
     });
   });
 
@@ -462,6 +466,8 @@ describe('Books Routes', () => {
       const res = await app.request('/books/not-exist/logs', {}, mockEnv);
 
       expect(res.status).toBe(404);
+      const body = (await res.json()) as { error: string; code: string };
+      expect(body.code).toBe(ErrorCode.BOOK_NOT_FOUND);
     });
 
     it('limitとcursorをクエリパラメータで受け取る', async () => {
@@ -566,8 +572,9 @@ describe('Books Routes', () => {
       );
 
       expect(res.status).toBe(404);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Book not found');
+      expect(body.code).toBe(ErrorCode.BOOK_NOT_FOUND);
     });
 
     it('reading以外のstatusは400を返す', async () => {
@@ -587,8 +594,9 @@ describe('Books Routes', () => {
       );
 
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: string };
+      const body = (await res.json()) as { error: string; code: string };
       expect(body.error).toBe('Book is not in reading status');
+      expect(body.code).toBe(ErrorCode.BOOK_NOT_IN_READING_STATUS);
     });
 
     it('pagesReadが0以下は400を返す', async () => {

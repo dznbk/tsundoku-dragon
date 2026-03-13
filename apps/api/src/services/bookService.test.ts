@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BookService } from './bookService';
-import { BadRequestError, NotFoundError } from '../lib/errors';
+import { ErrorCode } from '../lib/errors';
 import type { Book } from '@tsundoku-dragon/shared';
 
 vi.mock('nanoid', () => ({
@@ -258,9 +258,9 @@ describe('BookService', () => {
     it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      await expect(service.getBook('user-123', 'not-exist')).rejects.toThrow(
-        NotFoundError
-      );
+      await expect(
+        service.getBook('user-123', 'not-exist')
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
     });
   });
 
@@ -301,7 +301,7 @@ describe('BookService', () => {
 
       await expect(
         service.updateBook('user-123', 'not-exist', { title: '更新後' })
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
       expect(mockUpdate).not.toHaveBeenCalled();
     });
 
@@ -310,7 +310,9 @@ describe('BookService', () => {
 
       await expect(
         service.updateBook('user-123', 'book-123', { title: '更新後' })
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toMatchObject({
+        code: ErrorCode.CANNOT_UPDATE_ARCHIVED_BOOK,
+      });
     });
 
     it('新規スキルをカスタムスキルに登録する', async () => {
@@ -361,15 +363,17 @@ describe('BookService', () => {
 
       await expect(
         service.archiveBook('user-123', 'not-exist')
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
     });
 
     it('既にアーカイブ済みの本はエラー', async () => {
       mockFindById.mockResolvedValueOnce({ ...mockBook, status: 'archived' });
 
-      await expect(service.archiveBook('user-123', 'book-123')).rejects.toThrow(
-        BadRequestError
-      );
+      await expect(
+        service.archiveBook('user-123', 'book-123')
+      ).rejects.toMatchObject({
+        code: ErrorCode.BOOK_IS_ALREADY_ARCHIVED,
+      });
     });
   });
 
@@ -412,9 +416,9 @@ describe('BookService', () => {
     it('存在しない本はNotFoundErrorを投げる', async () => {
       mockFindById.mockResolvedValueOnce(null);
 
-      await expect(service.resetBook('user-123', 'not-exist')).rejects.toThrow(
-        NotFoundError
-      );
+      await expect(
+        service.resetBook('user-123', 'not-exist')
+      ).rejects.toMatchObject({ code: ErrorCode.BOOK_NOT_FOUND });
     });
 
     it('戦闘中の本はリセットできない', async () => {
@@ -423,9 +427,11 @@ describe('BookService', () => {
         status: 'reading',
       });
 
-      await expect(service.resetBook('user-123', 'book-123')).rejects.toThrow(
-        BadRequestError
-      );
+      await expect(
+        service.resetBook('user-123', 'book-123')
+      ).rejects.toMatchObject({
+        code: ErrorCode.CAN_ONLY_RESET_COMPLETED_BOOKS,
+      });
     });
   });
 });
