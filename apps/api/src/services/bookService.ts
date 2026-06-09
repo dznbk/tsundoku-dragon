@@ -4,7 +4,7 @@ import { BookRepository } from '../repositories/bookRepository';
 import { SkillRepository } from '../repositories/skillRepository';
 import type { CreateBookInput, UpdateBookInput } from '../types/api';
 import type { Env } from '../lib/dynamodb';
-import { BadRequestError, NotFoundError } from '../lib/errors';
+import { BadRequestError, NotFoundError, ErrorCode } from '../lib/errors';
 
 export class BookService {
   private repository: BookRepository;
@@ -73,7 +73,7 @@ export class BookService {
   async getBook(userId: string, bookId: string): Promise<Book> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
     return book;
   }
@@ -85,11 +85,14 @@ export class BookService {
   ): Promise<Book> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
 
     if (book.status === 'archived') {
-      throw new BadRequestError('Cannot update archived book');
+      throw new BadRequestError(
+        ErrorCode.CANNOT_UPDATE_ARCHIVED_BOOK,
+        'Cannot update archived book'
+      );
     }
 
     const now = new Date().toISOString();
@@ -111,11 +114,14 @@ export class BookService {
   async archiveBook(userId: string, bookId: string): Promise<void> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
 
     if (book.status === 'archived') {
-      throw new BadRequestError('Book is already archived');
+      throw new BadRequestError(
+        ErrorCode.BOOK_IS_ALREADY_ARCHIVED,
+        'Book is already archived'
+      );
     }
 
     const now = new Date().toISOString();
@@ -128,11 +134,14 @@ export class BookService {
   async resetBook(userId: string, bookId: string): Promise<Book> {
     const book = await this.repository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
 
     if (book.status !== 'completed') {
-      throw new BadRequestError('Can only reset completed books');
+      throw new BadRequestError(
+        ErrorCode.CAN_ONLY_RESET_COMPLETED_BOOKS,
+        'Can only reset completed books'
+      );
     }
 
     const now = new Date().toISOString();

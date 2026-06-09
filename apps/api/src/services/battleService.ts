@@ -7,7 +7,7 @@ import {
 import { SkillRepository } from '../repositories/skillRepository';
 import type { CreateBattleLogInput } from '../types/api';
 import type { Env } from '../lib/dynamodb';
-import { BadRequestError, NotFoundError } from '../lib/errors';
+import { BadRequestError, NotFoundError, ErrorCode } from '../lib/errors';
 import { defeatBonus as calcDefeatBonus } from '../lib/expCalculator';
 
 export interface SkillResult {
@@ -44,7 +44,7 @@ export class BattleService {
   ): Promise<LogsQueryResult> {
     const book = await this.bookRepository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
 
     return this.bookRepository.findLogs(userId, bookId, options);
@@ -57,11 +57,14 @@ export class BattleService {
   ): Promise<RecordBattleResult> {
     const book = await this.bookRepository.findById(userId, bookId);
     if (!book) {
-      throw new NotFoundError('Book not found');
+      throw new NotFoundError(ErrorCode.BOOK_NOT_FOUND, 'Book not found');
     }
 
     if (book.status !== 'reading') {
-      throw new BadRequestError('Book is not in reading status');
+      throw new BadRequestError(
+        ErrorCode.BOOK_NOT_IN_READING_STATUS,
+        'Book is not in reading status'
+      );
     }
 
     const now = new Date().toISOString();

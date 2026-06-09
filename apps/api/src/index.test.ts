@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { describe, it, expect } from 'vitest';
 import app from './index';
-import { BadRequestError, handleError } from './lib/errors';
+import { BadRequestError, ErrorCode, handleError } from './lib/errors';
 
 const mockEnv = {
   ALLOWED_ORIGINS: 'http://localhost:5173',
@@ -19,7 +19,10 @@ describe('API', () => {
 describe('グローバルエラーハンドラ', () => {
   const testApp = new Hono();
   testApp.get('/test-bad-request', () => {
-    throw new BadRequestError('test bad request');
+    throw new BadRequestError(
+      ErrorCode.CANNOT_UPDATE_ARCHIVED_BOOK,
+      'test bad request'
+    );
   });
   testApp.get('/test-unknown', () => {
     throw new Error('unexpected error');
@@ -30,8 +33,9 @@ describe('グローバルエラーハンドラ', () => {
     const res = await testApp.request('/test-bad-request');
 
     expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: string };
+    const body = (await res.json()) as { error: string; code: string };
     expect(body.error).toBe('test bad request');
+    expect(body.code).toBe(ErrorCode.CANNOT_UPDATE_ARCHIVED_BOOK);
   });
 
   it('AppError以外のエラーは500を返す', async () => {
