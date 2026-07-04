@@ -14,6 +14,7 @@ PUBLIC_JWK_CACHE_KEY = "firebase-public-jwk-cache-key"
 # シークレットは wrangler secret put で設定:
 # wrangler secret put AWS_ACCESS_KEY_ID --env staging
 # wrangler secret put AWS_SECRET_ACCESS_KEY --env staging
+# wrangler secret put RAKUTEN_APPLICATION_ID --env staging
 
 # ============================================================
 # Staging 環境

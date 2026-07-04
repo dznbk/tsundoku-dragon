@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { extractPagesFromExtent, fetchBooksByTitle } from './ndlApi';
 
+vi.stubEnv('VITE_API_URL', 'https://api.example.com');
+
 describe('ndlApi', () => {
   describe('extractPagesFromExtent', () => {
     it('"466p"から466を抽出する', () => {
@@ -69,7 +71,7 @@ describe('ndlApi', () => {
         author: 'テスト著者',
         isbn: '9784123456789',
         totalPages: 256,
-        coverUrl: 'https://ndlsearch.ndl.go.jp/thumbnail/9784123456789.jpg',
+        coverUrl: 'https://api.example.com/covers/9784123456789',
       });
     });
 

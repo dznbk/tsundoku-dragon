@@ -6,6 +6,7 @@ import { createDynamoDBClient, type Env } from './lib/dynamodb';
 import { handleError } from './lib/errors';
 import { authMiddleware } from './middleware/auth';
 import books from './routes/books';
+import covers from './routes/covers';
 import skills from './routes/skills';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -31,6 +32,9 @@ app.route('/books', books);
 
 app.use('/skills', authMiddleware);
 app.route('/skills', skills);
+
+// 書影は<img src>から直接参照されるため認証なしで公開する
+app.route('/covers', covers);
 
 app.get('/', (c) => {
   return c.json({ message: 'Tsundoku Dragon API' });
