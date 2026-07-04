@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { getCoverUrl } from '../utils/coverUrl';
 import { getDragonColor, type DragonRank } from '../utils/dragonRank';
 import styles from './BattleTransition.module.css';
 
@@ -14,11 +15,6 @@ const COVER_DURATION = 1000;
 const CROSSFADE_DURATION = 500;
 const DRAGON_DURATION = 500;
 
-function getBookCoverUrl(isbn: string): string {
-  const cleanIsbn = isbn.replace(/-/g, '');
-  return `https://ndlsearch.ndl.go.jp/thumbnail/${cleanIsbn}.jpg`;
-}
-
 export function BattleTransition({
   isbn,
   rank,
@@ -29,9 +25,7 @@ export function BattleTransition({
   );
   const dragonColor = getDragonColor(rank);
 
-  const coverUrl = useMemo(() => {
-    return isbn ? getBookCoverUrl(isbn) : null;
-  }, [isbn]);
+  const coverUrl = useMemo(() => getCoverUrl(isbn), [isbn]);
 
   // フェーズ遷移
   useEffect(() => {

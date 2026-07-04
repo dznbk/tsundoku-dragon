@@ -1,3 +1,5 @@
+import { getCoverUrl } from '../utils/coverUrl';
+
 export interface NdlBookInfo {
   title: string | null;
   totalPages: number | null;
@@ -40,7 +42,7 @@ export async function fetchBookInfoByIsbn(isbn: string): Promise<NdlBookInfo> {
     const totalPages = pagesMatch ? parseInt(pagesMatch[1], 10) : null;
 
     // 書影URL
-    const coverUrl = `https://ndlsearch.ndl.go.jp/thumbnail/${cleanIsbn}.jpg`;
+    const coverUrl = getCoverUrl(cleanIsbn);
 
     return { title, totalPages, coverUrl };
   } catch {
@@ -149,9 +151,7 @@ export async function fetchBooksByTitle(
       const isbn = extractIsbnFromItem(item);
       const extent = item.querySelector('extent')?.textContent;
       const totalPages = extractPagesFromExtent(extent);
-      const coverUrl = isbn
-        ? `https://ndlsearch.ndl.go.jp/thumbnail/${isbn}.jpg`
-        : null;
+      const coverUrl = getCoverUrl(isbn);
 
       results.push({
         title: itemTitle,

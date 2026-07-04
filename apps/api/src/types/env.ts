@@ -15,4 +15,6 @@ export type Env = {
   FIREBASE_AUTH_EMULATOR_HOST?: string;
   // CORS
   ALLOWED_ORIGINS?: string;
+  // 楽天ウェブサービス（書影取得）
+  RAKUTEN_APPLICATION_ID?: string;
 };

@@ -1,4 +1,5 @@
 import type { Book } from '../services/bookApi';
+import { getCoverUrl } from '../utils/coverUrl';
 import { ProgressBar } from './ProgressBar';
 import { StatusBadge } from './StatusBadge';
 import styles from './BookCard.module.css';
@@ -8,15 +9,8 @@ interface BookCardProps {
   onClick?: () => void;
 }
 
-function getCoverUrl(isbn?: string): string {
-  if (!isbn) {
-    return '/assets/default-cover.png';
-  }
-  return `https://ndlsearch.ndl.go.jp/thumbnail/${isbn}.jpg`;
-}
-
 export function BookCard({ book, onClick }: BookCardProps) {
-  const coverUrl = getCoverUrl(book.isbn);
+  const coverUrl = getCoverUrl(book.isbn) ?? '/assets/default-cover.png';
 
   const handleClick = () => {
     if (onClick) {
